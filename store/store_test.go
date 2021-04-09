@@ -249,66 +249,79 @@ var _ = Describe("store", func() {
 					Expect(line).To(HaveLen(13))
 					Expect(line[0]).To(Equal(Symbol{
 						Rune:     's',
+						Size:     1,
 						Line:     1,
 						Position: 1,
 					}))
 					Expect(line[1]).To(Equal(Symbol{
 						Rune:     'o',
+						Size:     1,
 						Line:     1,
 						Position: 2,
 					}))
 					Expect(line[2]).To(Equal(Symbol{
 						Rune:     'm',
+						Size:     1,
 						Line:     1,
 						Position: 3,
 					}))
 					Expect(line[3]).To(Equal(Symbol{
 						Rune:     'e',
+						Size:     1,
 						Line:     1,
 						Position: 4,
 					}))
 					Expect(line[4]).To(Equal(Symbol{
 						Rune:     ' ',
+						Size:     1,
 						Line:     1,
 						Position: 5,
 					}))
 					Expect(line[5]).To(Equal(Symbol{
 						Rune:     'c',
+						Size:     1,
 						Line:     1,
 						Position: 6,
 					}))
 					Expect(line[6]).To(Equal(Symbol{
 						Rune:     'o',
+						Size:     1,
 						Line:     1,
 						Position: 7,
 					}))
 					Expect(line[7]).To(Equal(Symbol{
 						Rune:     'n',
+						Size:     1,
 						Line:     1,
 						Position: 8,
 					}))
 					Expect(line[8]).To(Equal(Symbol{
 						Rune:     't',
+						Size:     1,
 						Line:     1,
 						Position: 9,
 					}))
 					Expect(line[9]).To(Equal(Symbol{
 						Rune:     'e',
+						Size:     1,
 						Line:     1,
 						Position: 10,
 					}))
 					Expect(line[10]).To(Equal(Symbol{
 						Rune:     'n',
+						Size:     1,
 						Line:     1,
 						Position: 11,
 					}))
 					Expect(line[11]).To(Equal(Symbol{
 						Rune:     't',
+						Size:     1,
 						Line:     1,
 						Position: 12,
 					}))
 					Expect(line[12]).To(Equal(Symbol{
 						Rune:     '\n',
+						Size:     1,
 						Line:     1,
 						Position: 13,
 					}))
@@ -317,26 +330,31 @@ var _ = Describe("store", func() {
 					Expect(line).To(HaveLen(5))
 					Expect(line[0]).To(Equal(Symbol{
 						Rune:     'h',
+						Size:     1,
 						Line:     2,
 						Position: 1,
 					}))
 					Expect(line[1]).To(Equal(Symbol{
 						Rune:     'e',
+						Size:     1,
 						Line:     2,
 						Position: 2,
 					}))
 					Expect(line[2]).To(Equal(Symbol{
 						Rune:     'r',
+						Size:     1,
 						Line:     2,
 						Position: 3,
 					}))
 					Expect(line[3]).To(Equal(Symbol{
 						Rune:     'e',
+						Size:     1,
 						Line:     2,
 						Position: 4,
 					}))
 					Expect(line[4]).To(Equal(Symbol{
 						Rune:     '\n',
+						Size:     1,
 						Line:     2,
 						Position: 5,
 					}))
@@ -345,46 +363,55 @@ var _ = Describe("store", func() {
 					Expect(line).To(HaveLen(9))
 					Expect(line[0]).To(Equal(Symbol{
 						Rune:     'f',
+						Size:     1,
 						Line:     3,
 						Position: 1,
 					}))
 					Expect(line[1]).To(Equal(Symbol{
 						Rune:     'o',
+						Size:     1,
 						Line:     3,
 						Position: 2,
 					}))
 					Expect(line[2]).To(Equal(Symbol{
 						Rune:     'r',
+						Size:     1,
 						Line:     3,
 						Position: 3,
 					}))
 					Expect(line[3]).To(Equal(Symbol{
 						Rune:     ' ',
+						Size:     1,
 						Line:     3,
 						Position: 4,
 					}))
 					Expect(line[4]).To(Equal(Symbol{
 						Rune:     't',
+						Size:     1,
 						Line:     3,
 						Position: 5,
 					}))
 					Expect(line[5]).To(Equal(Symbol{
 						Rune:     'e',
+						Size:     1,
 						Line:     3,
 						Position: 6,
 					}))
 					Expect(line[6]).To(Equal(Symbol{
 						Rune:     's',
+						Size:     1,
 						Line:     3,
 						Position: 7,
 					}))
 					Expect(line[7]).To(Equal(Symbol{
 						Rune:     't',
+						Size:     1,
 						Line:     3,
 						Position: 8,
 					}))
 					Expect(line[8]).To(Equal(Symbol{
 						Rune:     '\n',
+						Size:     1,
 						Line:     3,
 						Position: 9,
 					}))
@@ -393,46 +420,55 @@ var _ = Describe("store", func() {
 					Expect(line).To(HaveLen(9))
 					Expect(line[0]).To(Equal(Symbol{
 						Rune:     'p',
+						Size:     1,
 						Line:     4,
 						Position: 1,
 					}))
 					Expect(line[1]).To(Equal(Symbol{
 						Rune:     'u',
+						Size:     1,
 						Line:     4,
 						Position: 2,
 					}))
 					Expect(line[2]).To(Equal(Symbol{
 						Rune:     'r',
+						Size:     1,
 						Line:     4,
 						Position: 3,
 					}))
 					Expect(line[3]).To(Equal(Symbol{
 						Rune:     'p',
+						Size:     1,
 						Line:     4,
 						Position: 4,
 					}))
 					Expect(line[4]).To(Equal(Symbol{
 						Rune:     'o',
+						Size:     1,
 						Line:     4,
 						Position: 5,
 					}))
 					Expect(line[5]).To(Equal(Symbol{
 						Rune:     's',
+						Size:     1,
 						Line:     4,
 						Position: 6,
 					}))
 					Expect(line[6]).To(Equal(Symbol{
 						Rune:     'e',
+						Size:     1,
 						Line:     4,
 						Position: 7,
 					}))
 					Expect(line[7]).To(Equal(Symbol{
 						Rune:     's',
+						Size:     1,
 						Line:     4,
 						Position: 8,
 					}))
 					Expect(line[8]).To(Equal(Symbol{
 						Rune:     '\n',
+						Size:     1,
 						Line:     4,
 						Position: 9,
 					}))
@@ -459,6 +495,7 @@ var _ = Describe("store", func() {
 					Expect(line).To(HaveLen(13))
 					Expect(line[0]).To(Equal(Symbol{
 						Rune:     's',
+						Size:     1,
 						Line:     1,
 						Position: 1,
 					}))
@@ -468,6 +505,7 @@ var _ = Describe("store", func() {
 					Expect(line).To(HaveLen(5))
 					Expect(line[0]).To(Equal(Symbol{
 						Rune:     'h',
+						Size:     1,
 						Line:     2,
 						Position: 1,
 					}))
@@ -477,6 +515,7 @@ var _ = Describe("store", func() {
 					Expect(line).To(HaveLen(5))
 					Expect(line[0]).To(Equal(Symbol{
 						Rune:     'h',
+						Size:     1,
 						Line:     2,
 						Position: 1,
 					}))
@@ -486,6 +525,7 @@ var _ = Describe("store", func() {
 					Expect(line).To(HaveLen(13))
 					Expect(line[0]).To(Equal(Symbol{
 						Rune:     's',
+						Size:     1,
 						Line:     1,
 						Position: 1,
 					}))
@@ -495,6 +535,7 @@ var _ = Describe("store", func() {
 					Expect(line).To(HaveLen(9))
 					Expect(line[0]).To(Equal(Symbol{
 						Rune:     'p',
+						Size:     1,
 						Line:     4,
 						Position: 1,
 					}))

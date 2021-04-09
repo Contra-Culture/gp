@@ -7,6 +7,7 @@ import (
 
 type Symbol struct {
 	Rune     rune
+	Size     int
 	Line     int
 	Position int
 }
@@ -26,12 +27,13 @@ func New(source io.RuneReader) (store *SymbolsStore, err error) {
 	var (
 		r        rune
 		i        int
+		size     int
 		symbol   Symbol
 		line     = 1
 		position = 1
 	)
 	for i = 0; true; i++ {
-		r, _, err = source.ReadRune()
+		r, size, err = source.ReadRune()
 		if err != nil {
 			if err == io.EOF {
 				err = nil
@@ -41,6 +43,7 @@ func New(source io.RuneReader) (store *SymbolsStore, err error) {
 		}
 		symbol = Symbol{
 			Rune:     r,
+			Size:     size,
 			Line:     line,
 			Position: position,
 		}
@@ -55,6 +58,7 @@ func New(source io.RuneReader) (store *SymbolsStore, err error) {
 	}
 	return
 }
+
 func (s *SymbolsStore) GetSymbol(idx int) (symbol Symbol, err error) {
 	symbolsQnt := len(s.symbolsIndex)
 	if idx >= symbolsQnt {
