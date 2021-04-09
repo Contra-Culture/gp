@@ -261,6 +261,31 @@ var _ = Describe("reader", func() {
 		It("returns reed symbols", func() {
 			frame := reader.Frame()
 			Expect(frame).To(HaveLen(0))
+			s, err := reader.ReadSymbol()
+			Expect(err).NotTo(HaveOccurred())
+			expected1 := store.Symbol{
+				Rune:     's',
+				Size:     1,
+				Line:     1,
+				Position: 1,
+			}
+			Expect(s).To(Equal(expected1))
+			frame = reader.Frame()
+			Expect(frame).To(HaveLen(1))
+			Expect(frame[0]).To(Equal(expected1))
+			s, err = reader.ReadSymbol()
+			Expect(err).NotTo(HaveOccurred())
+			expected2 := store.Symbol{
+				Rune:     'o',
+				Size:     1,
+				Line:     1,
+				Position: 2,
+			}
+			Expect(s).To(Equal(expected2))
+			frame = reader.Frame()
+			Expect(frame).To(HaveLen(2))
+			Expect(frame[0]).To(Equal(expected1))
+			Expect(frame[1]).To(Equal(expected2))
 		})
 	})
 })
