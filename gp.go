@@ -105,21 +105,51 @@ func New(meaning string, parser Parser) (node *ParserNode) {
 	return
 }
 func Maybe(meaning string, pns ...*ParserNode) (node *ParserNode) {
-	node.meaning = meaning
-	node.children = pns
+	parser := func(*reader.BaseSymbolReader) (rn *ResultNode, ok bool, err error) {
+		return
+	}
+	node = &ParserNode{
+		meaning:  meaning,
+		parser:   parser,
+		children: []*ParserNode{},
+	}
 	return
 }
 func And(meaning string, pns ...*ParserNode) (node *ParserNode) {
-	node.meaning = meaning
-	node.children = pns
+	parser := func(*reader.BaseSymbolReader) (rn *ResultNode, ok bool, err error) {
+		return
+	}
+	node = &ParserNode{
+		meaning:  meaning,
+		parser:   parser,
+		children: []*ParserNode{},
+	}
 	return
 }
 func Xor(meaning string, pns ...*ParserNode) (node *ParserNode) {
-	node.meaning = meaning
-	node.children = pns
+	parser := func(*reader.BaseSymbolReader) (rn *ResultNode, ok bool, err error) {
+		return
+	}
+	node = &ParserNode{
+		meaning:  meaning,
+		parser:   parser,
+		children: []*ParserNode{},
+	}
 	return
 }
 func Many(meaning string, pns ...*ParserNode) (node *ParserNode) {
+	parser := func(*reader.BaseSymbolReader) (rn *ResultNode, ok bool, err error) {
+		return
+	}
+	node = &ParserNode{
+		meaning:  meaning,
+		parser:   parser,
+		children: []*ParserNode{},
+	}
+	return
+}
+func (pn *ParserNode) Parse(reader *reader.BaseSymbolReader) (result *ResultNode, ok bool, err error) {
+	result, ok, err = pn.parser(reader)
 	return
 }
 
