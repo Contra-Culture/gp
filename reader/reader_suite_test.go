@@ -7,7 +7,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func TestIterator(t *testing.T) {
+func TestReader(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Iterator Suite")
+	RunSpecs(t, "Reader Suite")
 }

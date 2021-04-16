@@ -3,28 +3,65 @@ package gp
 import (
 	"regexp"
 
-	iterator "github.com/Contra-Culture/gp/iterator"
+	"github.com/Contra-Culture/gp/reader"
 	"github.com/Contra-Culture/gp/store"
 )
 
-type Parser func(*iterator.SymbolsIterator) (*ResultNode, bool, error)
+type Parser func(*reader.BaseSymbolReader) (*ResultNode, bool, error)
 
-func PatternTokenParser(pattern string) Parser {
-	return func(iter *iterator.SymbolsIterator) (rnode *ResultNode, ok bool, err error) {
-		matched, err := regexp.MatchReader(pattern, iter)
-		
+func DictTokenParser(token string, dict []string) Parser {
+	return func(sr *reader.BaseSymbolReader) (rnode *ResultNode, ok bool, err error) {
+		var s store.Symbol
+		for _, word := range dict {
+			wordRunes := []rune(word)
+			for _, expectedRune := range wordRunes {
+				s, err = sr.ReadSymbol()
+				if err != nil {
+					return
+				}
+				ok = s.Rune == expectedRune
+				if !ok {
+					return
+				}
+			}
+		}
+		rnode = &ResultNode{
+			token:    token,
+			line:     sr.Frame()[0].Line,
+			posStart: sr.Frame()[0].Position, //fix
+			posEnd:   sr.Frame()[0].Position,
+			literal:  "dumb",
+			children: []*ResultNode{},
+		}
+		return
 	}
 }
-
-func ExactTokenParser(exactTokenValue string) Parser {
-	return func(iter *iterator.SymbolsIterator) (rnode *ResultNode, ok bool, err error) {
+func PatternTokenParser(token string, pattern string) Parser {
+	return func(sr *reader.BaseSymbolReader) (rnode *ResultNode, ok bool, err error) {
+		ok, err = regexp.MatchReader(pattern, sr)
+		if err != nil {
+			return
+		}
+		rnode = &ResultNode{
+			token:    token,
+			line:     sr.Frame()[0].Line,
+			posStart: sr.Frame()[0].Position, //fix
+			posEnd:   sr.Frame()[0].Position,
+			literal:  "dumb",
+			children: []*ResultNode{},
+		}
+		return
+	}
+}
+func ExactTokenParser(token string, exactTokenValue string) Parser {
+	return func(sr *reader.BaseSymbolReader) (rnode *ResultNode, ok bool, err error) {
 		expectedRunes := []rune(exactTokenValue)
 		var (
 			s        store.Symbol
 			posStart int
 		)
 		for _, expectedRune := range expectedRunes {
-			s, err = iter.Next()
+			s, err = sr.ReadSymbol()
 			if err != nil {
 				return
 			}
@@ -37,7 +74,7 @@ func ExactTokenParser(exactTokenValue string) Parser {
 			}
 		}
 		rnode = &ResultNode{
-			token:    exactTokenValue,
+			token:    token,
 			line:     s.Line,
 			posStart: posStart,
 			posEnd:   s.Position,
@@ -48,7 +85,7 @@ func ExactTokenParser(exactTokenValue string) Parser {
 	}
 }
 func SubStringParser(str string) Parser {
-	return func(iter *iterator.SymbolsIterator) (rnode *ResultNode, ok bool, err error) {
+	return func(sr *reader.BaseSymbolReader) (rnode *ResultNode, ok bool, err error) {
 		return
 	}
 }
@@ -60,8 +97,11 @@ type ParserNode struct {
 }
 
 func New(meaning string, parser Parser) (node *ParserNode) {
-	node.meaning = meaning
-	node.parser = parser
+	node = &ParserNode{
+		meaning:  meaning,
+		parser:   parser,
+		children: []*ParserNode{},
+	}
 	return
 }
 func Maybe(meaning string, pns ...*ParserNode) (node *ParserNode) {
@@ -84,10 +124,10 @@ func Many(meaning string, pns ...*ParserNode) (node *ParserNode) {
 }
 
 type ResultNode struct {
-	token    string
 	line     int
 	posStart int
 	posEnd   int
+	token    string
 	literal  string
 	children []*ResultNode
 }

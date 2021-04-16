@@ -1,7 +1,6 @@
 package reader
 
 import (
-	"github.com/Contra-Culture/gp/store"
 	symbolsStore "github.com/Contra-Culture/gp/store"
 )
 
@@ -11,14 +10,14 @@ type BaseSymbolReader struct {
 	frame    []symbolsStore.Symbol
 }
 
-func New(store *store.SymbolsStore, beginIdx int) *BaseSymbolReader {
+func New(store *symbolsStore.SymbolsStore, beginIdx int) *BaseSymbolReader {
 	return &BaseSymbolReader{
 		beginIdx: beginIdx,
 		store:    store,
 		frame:    []symbolsStore.Symbol{},
 	}
 }
-func (sr *BaseSymbolReader) ReadSymbol() (s store.Symbol, err error) {
+func (sr *BaseSymbolReader) ReadSymbol() (s symbolsStore.Symbol, err error) {
 	cursor := len(sr.frame)
 	s, err = sr.store.GetSymbol(cursor)
 	if err != nil {
@@ -38,7 +37,7 @@ func (sr *BaseSymbolReader) Continuation() *BaseSymbolReader {
 	}
 }
 func (sr *BaseSymbolReader) ReadRune() (r rune, size int, err error) {
-	var s store.Symbol
+	var s symbolsStore.Symbol
 	s, err = sr.ReadSymbol()
 	if err != nil {
 		return

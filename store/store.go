@@ -106,3 +106,4 @@ func (s *SymbolsStore) GetLineBySymbolIndex(idx int) (ln int, symbols []Symbol, 
 func (s *SymbolsStore) LineIndex() []int {
 	return s.linesIndex
 }
+
