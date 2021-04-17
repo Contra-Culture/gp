@@ -91,60 +91,90 @@ func SubStringParser(str string) Parser {
 }
 
 type ParserNode struct {
+	optional Optional
 	meaning  string
 	parser   Parser
 	children []*ParserNode
 }
+type Optional bool
 
-func New(meaning string, parser Parser) (node *ParserNode) {
-	node = &ParserNode{
+func New(meaning string, optional Optional, parser Parser) *ParserNode {
+	return &ParserNode{
+		optional: optional,
 		meaning:  meaning,
 		parser:   parser,
 		children: []*ParserNode{},
 	}
-	return
 }
-func Maybe(meaning string, pns ...*ParserNode) (node *ParserNode) {
-	parser := func(*reader.BaseSymbolReader) (rn *ResultNode, ok bool, err error) {
+func Seq(meaning string, optional Optional, pns ...*ParserNode) (node *ParserNode) {
+	parser := func(reader *reader.BaseSymbolReader) (rn *ResultNode, ok bool, err error) {
+		rn = &ResultNode{}
+		var childNode *ResultNode
+		for _, pn := range pns {
+			childNode, ok, err = pn.Parse(reader)
+			if err != nil {
+				return
+			}
+			if !ok {
+				rn = nil
+				return
+			}
+			rn.children = append(rn.children, childNode)
+		}
 		return
 	}
 	node = &ParserNode{
+		optional: optional,
 		meaning:  meaning,
 		parser:   parser,
-		children: []*ParserNode{},
+		children: pns,
 	}
 	return
 }
-func And(meaning string, pns ...*ParserNode) (node *ParserNode) {
-	parser := func(*reader.BaseSymbolReader) (rn *ResultNode, ok bool, err error) {
+func Var(meaning string, optional Optional, pns ...*ParserNode) (node *ParserNode) {
+	parser := func(reader *reader.BaseSymbolReader) (rn *ResultNode, ok bool, err error) {
+		rn = &ResultNode{}
+		var childNode *ResultNode
+		for _, pn := range pns {
+			childNode, ok, err = pn.Parse(reader)
+			if err != nil {
+				return
+			}
+			if ok {
+				rn.children = append(rn.children, childNode)
+				break
+			}
+		}
 		return
 	}
 	node = &ParserNode{
+		optional: optional,
 		meaning:  meaning,
 		parser:   parser,
-		children: []*ParserNode{},
+		children: pns,
 	}
 	return
 }
-func Xor(meaning string, pns ...*ParserNode) (node *ParserNode) {
-	parser := func(*reader.BaseSymbolReader) (rn *ResultNode, ok bool, err error) {
-		return
+func Rep(meaning string, optional Optional, pn *ParserNode) (node *ParserNode) {
+	parser := func(reader *reader.BaseSymbolReader) (rn *ResultNode, ok bool, err error) {
+		rn = &ResultNode{}
+		var childNode *ResultNode
+		for {
+			childNode, ok, err = pn.Parse(reader)
+			if err != nil {
+				return
+			}
+			if !ok {
+				return
+			}
+			rn.children = append(rn.children, childNode)
+		}
 	}
 	node = &ParserNode{
+		optional: optional,
 		meaning:  meaning,
 		parser:   parser,
-		children: []*ParserNode{},
-	}
-	return
-}
-func Many(meaning string, pns ...*ParserNode) (node *ParserNode) {
-	parser := func(*reader.BaseSymbolReader) (rn *ResultNode, ok bool, err error) {
-		return
-	}
-	node = &ParserNode{
-		meaning:  meaning,
-		parser:   parser,
-		children: []*ParserNode{},
+		children: []*ParserNode{pn},
 	}
 	return
 }
