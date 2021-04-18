@@ -10,7 +10,7 @@ var _ = Describe("gp", func() {
 	Context("creation", func() {
 		Describe("New()", func() {
 			It("returns parser node", func() {
-				pn := gp.New("test purpose", gp.ExactTokenParser("test", "test"))
+				pn := gp.New("test purpose", gp.Optional(false), gp.ExactTokenParser("test", "test"))
 				Expect(pn).NotTo(BeNil())
 			})
 		})
