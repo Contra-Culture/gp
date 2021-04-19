@@ -29,7 +29,7 @@ func DictTokenParser(token string, dict []string) Parser {
 		}
 		rnode = &ResultNode{
 			Token:    token,
-			Line:     sr.Frame()[0].Line,
+			Lines:    []int{sr.Frame()[0].Line, sr.Frame()[0].Line},
 			PosStart: sr.Frame()[0].Position, //fix
 			PosEnd:   sr.Frame()[0].Position,
 			Literal:  "dumb",
@@ -51,7 +51,7 @@ func PatternTokenParser(token string, pattern string) (parser Parser, err error)
 		}
 		rnode = &ResultNode{
 			Token:    token,
-			Line:     sr.Frame()[0].Line,
+			Lines:    []int{sr.Frame()[0].Line, sr.Frame()[0].Line},
 			PosStart: sr.Frame()[0].Position, //fix
 			PosEnd:   sr.Frame()[0].Position,
 			Literal:  "dumb",
@@ -83,7 +83,7 @@ func ExactTokenParser(token string, exactTokenValue string) Parser {
 		}
 		rnode = &ResultNode{
 			Token:    token,
-			Line:     s.Line,
+			Lines:    []int{s.Line, s.Line},
 			PosStart: posStart,
 			PosEnd:   s.Position,
 			Literal:  exactTokenValue,
@@ -125,7 +125,7 @@ func Seq(meaning string, pns ...*ParserNode) (node *ParserNode) {
 			rn.Children = append(rn.Children, childNode)
 		}
 		fmt.Printf("\nresult node: %#v\n", rn.Children)
-		rn.Line = rn.Children[0].Line
+		rn.Lines = rn.Children[0].Lines
 		rn.PosStart = rn.Children[0].PosStart
 		last := len(rn.Children) - 1
 		rn.PosEnd = rn.Children[last].PosEnd
@@ -191,7 +191,7 @@ func (pn *ParserNode) Parse(reader *reader.BaseSymbolReader) (result *ResultNode
 }
 
 type ResultNode struct {
-	Line     int
+	Lines    []int // pair: first line number and last line number
 	PosStart int
 	PosEnd   int
 	Token    string
