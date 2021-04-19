@@ -196,16 +196,29 @@ func Rep(meaning string, pn *ParserNode) (node *ParserNode) {
 	parser := func(reader *reader.BaseSymbolReader) (rn *ResultNode, ok bool, err error) {
 		rn = &ResultNode{}
 		var childNode *ResultNode
+		var literal strings.Builder
 		for {
 			childNode, ok, err = pn.Parse(reader)
+			fmt.Printf("\n\tRep(): %#v, ok: %#v, err: %#v\n", childNode, ok, err)
 			if err != nil {
 				return
 			}
 			if !ok {
-				return
+				break
 			}
 			rn.Children = append(rn.Children, childNode)
+			literal.WriteString(childNode.Literal)
+			_, err = reader.ReadSymbol()
+			if err != nil {
+				return
+			}
 		}
+		ok = len(rn.Children) > 0
+		rn.Lines = []int{rn.Children[0].Lines[0], rn.Children[len(rn.Children)-1].Lines[1]}
+		rn.Literal = literal.String()
+		rn.PosStart = rn.Children[0].PosStart
+		rn.PosEnd = rn.Children[len(rn.Children)-1].PosEnd
+		return
 	}
 	node = &ParserNode{
 		meaning:  meaning,

@@ -223,7 +223,97 @@ var _ = Describe("gp", func() {
 			Context("when repeatable node", func() {
 				Context("when matches", func() {
 					It("returns result node and ok", func() {
-
+						sr := strings.NewReader("func func func garbage")
+						s, err := store.New(sr)
+						Expect(err).NotTo(HaveOccurred())
+						r := reader.New(s, 0)
+						funcTokenParser := gp.New("rep func keywords", gp.ExactTokenParser("keyword", "func"))
+						spaceTokenParser := gp.New("space", gp.ExactTokenParser("space", " "))
+						rep := gp.Rep("repeatable", gp.Seq("func def", funcTokenParser, spaceTokenParser))
+						result, ok, err := rep.Parse(r)
+						Expect(err).NotTo(HaveOccurred())
+						Expect(ok).To(BeTrue())
+						Expect(result.Lines).To(Equal([]int{1, 1}))
+						Expect(result.PosStart).To(Equal(1))
+						Expect(result.PosEnd).To(Equal(15))
+						Expect(result.Token).To(Equal(""))
+						Expect(result.Literal).To(Equal("func func func "))
+						Expect(result.Children).To(HaveLen(3))
+						Expect(result.Children[0]).To(Equal(&gp.ResultNode{
+							Lines:    []int{1, 1},
+							PosStart: 1,
+							PosEnd:   5,
+							Token:    "expression",
+							Literal:  "func ",
+							Children: []*gp.ResultNode{
+								{
+									Lines:    []int{1, 1},
+									PosStart: 1,
+									PosEnd:   4,
+									Token:    "keyword",
+									Literal:  "func",
+									Children: nil,
+								},
+								{
+									Lines:    []int{1, 1},
+									PosStart: 5,
+									PosEnd:   5,
+									Token:    "space",
+									Literal:  " ",
+									Children: nil,
+								},
+							},
+						}))
+						Expect(result.Children[1]).To(Equal(&gp.ResultNode{
+							Lines:    []int{1, 1},
+							PosStart: 6,
+							PosEnd:   10,
+							Token:    "expression",
+							Literal:  "func ",
+							Children: []*gp.ResultNode{
+								{
+									Lines:    []int{1, 1},
+									PosStart: 6,
+									PosEnd:   9,
+									Token:    "keyword",
+									Literal:  "func",
+									Children: nil,
+								},
+								{
+									Lines:    []int{1, 1},
+									PosStart: 10,
+									PosEnd:   10,
+									Token:    "space",
+									Literal:  " ",
+									Children: nil,
+								},
+							},
+						}))
+						Expect(result.Children[2]).To(Equal(&gp.ResultNode{
+							Lines:    []int{1, 1},
+							PosStart: 11,
+							PosEnd:   15,
+							Token:    "expression",
+							Literal:  "func ",
+							Children: []*gp.ResultNode{
+								{
+									Lines:    []int{1, 1},
+									PosStart: 11,
+									PosEnd:   14,
+									Token:    "keyword",
+									Literal:  "func",
+									Children: nil,
+								},
+								{
+									Lines:    []int{1, 1},
+									PosStart: 15,
+									PosEnd:   15,
+									Token:    "space",
+									Literal:  " ",
+									Children: nil,
+								},
+							},
+						}))
 					})
 				})
 				Context("when not matches", func() {
