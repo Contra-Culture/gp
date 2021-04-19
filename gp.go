@@ -119,19 +119,27 @@ func New(meaning string, parser Parser) *ParserNode {
 }
 func Opt(meaning string, pn *ParserNode) *ParserNode {
 	parser := func(reader *reader.BaseSymbolReader) (result *ResultNode, ok bool, err error) {
-		result, ok, err = pn.Parse(reader)
+		var rn *ResultNode
+		result = &ResultNode{}
+		rn, ok, err = pn.Parse(reader)
 		if err != nil {
 			return
 		}
-		if !ok {
-			return
+		if ok {
+			result.Lines = rn.Lines
+			result.Literal = rn.Literal
+			result.Token = "testToken"
+			result.PosStart = rn.PosStart
+			result.PosEnd = rn.PosEnd
+			result.Children = []*ResultNode{rn}
 		}
+		ok = true
 		return
 	}
 	return &ParserNode{
 		meaning:  meaning,
 		parser:   parser,
-		children: []*ParserNode{},
+		children: []*ParserNode{pn},
 	}
 }
 func Seq(meaning string, pns ...*ParserNode) (node *ParserNode) {

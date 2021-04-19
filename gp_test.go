@@ -20,7 +20,9 @@ var _ = Describe("gp", func() {
 		})
 		Describe("Opt()", func() {
 			It("returns parser node", func() {
-
+				testTokenParset := gp.New("test purpose", gp.ExactTokenParser("test", "test"))
+				pn := gp.Opt("optional", testTokenParset)
+				Expect(pn).NotTo(BeNil())
 			})
 		})
 		Describe("Var()", func() {
@@ -53,6 +55,60 @@ var _ = Describe("gp", func() {
 	})
 	Context("parsing", func() {
 		Describe(".Parse()", func() {
+			Context("when optional node", func() {
+				Context("when matches", func() {
+					It("returns result node and ok", func() {
+						sr := strings.NewReader("test text")
+						s, err := store.New(sr)
+						Expect(err).NotTo(HaveOccurred())
+						r := reader.New(s, 0)
+						testTokenParset := gp.New("test purpose", gp.ExactTokenParser("testToken", "test"))
+						pn := gp.Opt("optional", testTokenParset)
+						Expect(pn).NotTo(BeNil())
+						result, ok, err := pn.Parse(r)
+						Expect(err).NotTo(HaveOccurred())
+						Expect(ok).To(BeTrue())
+						Expect(result).To(Equal(&gp.ResultNode{
+							Lines:    []int{1, 1},
+							PosStart: 1,
+							PosEnd:   4,
+							Token:    "testToken",
+							Literal:  "test",
+							Children: []*gp.ResultNode{
+								{
+									Lines:    []int{1, 1},
+									PosStart: 1,
+									PosEnd:   4,
+									Token:    "testToken",
+									Literal:  "test",
+								},
+							},
+						}))
+					})
+				})
+				Context("when not matches", func() {
+					It("returns ok", func() {
+						sr := strings.NewReader("text text")
+						s, err := store.New(sr)
+						Expect(err).NotTo(HaveOccurred())
+						r := reader.New(s, 0)
+						testTokenParset := gp.New("test purpose", gp.ExactTokenParser("testToken", "test"))
+						pn := gp.Opt("optional", testTokenParset)
+						Expect(pn).NotTo(BeNil())
+						result, ok, err := pn.Parse(r)
+						Expect(err).NotTo(HaveOccurred())
+						Expect(ok).To(BeTrue())
+						Expect(result).To(Equal(&gp.ResultNode{
+							Lines:    nil,
+							PosStart: 0,
+							PosEnd:   0,
+							Token:    "",
+							Literal:  "",
+							Children: nil,
+						}))
+					})
+				})
+			})
 			Context("when custom node", func() {
 				Context("when matches", func() {
 					It("returns result node and ok", func() {
