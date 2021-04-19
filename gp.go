@@ -1,7 +1,9 @@
 package gp
 
 import (
+	"fmt"
 	"regexp"
+	"strings"
 
 	"github.com/Contra-Culture/gp/reader"
 	"github.com/Contra-Culture/gp/store"
@@ -26,32 +28,38 @@ func DictTokenParser(token string, dict []string) Parser {
 			}
 		}
 		rnode = &ResultNode{
-			token:    token,
-			line:     sr.Frame()[0].Line,
-			posStart: sr.Frame()[0].Position, //fix
-			posEnd:   sr.Frame()[0].Position,
-			literal:  "dumb",
-			children: []*ResultNode{},
+			Token:    token,
+			Line:     sr.Frame()[0].Line,
+			PosStart: sr.Frame()[0].Position, //fix
+			PosEnd:   sr.Frame()[0].Position,
+			Literal:  "dumb",
+			Children: []*ResultNode{},
 		}
 		return
 	}
 }
-func PatternTokenParser(token string, pattern string) Parser {
-	return func(sr *reader.BaseSymbolReader) (rnode *ResultNode, ok bool, err error) {
-		ok, err = regexp.MatchReader(pattern, sr)
-		if err != nil {
+func PatternTokenParser(token string, pattern string) (parser Parser, err error) {
+	re, err := regexp.Compile(pattern)
+	if err != nil {
+		return
+	}
+	parser = func(sr *reader.BaseSymbolReader) (rnode *ResultNode, ok bool, err error) {
+		loc := re.FindReaderIndex(sr)
+		ok = loc != nil
+		if !ok {
 			return
 		}
 		rnode = &ResultNode{
-			token:    token,
-			line:     sr.Frame()[0].Line,
-			posStart: sr.Frame()[0].Position, //fix
-			posEnd:   sr.Frame()[0].Position,
-			literal:  "dumb",
-			children: []*ResultNode{},
+			Token:    token,
+			Line:     sr.Frame()[0].Line,
+			PosStart: sr.Frame()[0].Position, //fix
+			PosEnd:   sr.Frame()[0].Position,
+			Literal:  "dumb",
+			Children: []*ResultNode{},
 		}
 		return
 	}
+	return
 }
 func ExactTokenParser(token string, exactTokenValue string) Parser {
 	return func(sr *reader.BaseSymbolReader) (rnode *ResultNode, ok bool, err error) {
@@ -74,43 +82,37 @@ func ExactTokenParser(token string, exactTokenValue string) Parser {
 			}
 		}
 		rnode = &ResultNode{
-			token:    token,
-			line:     s.Line,
-			posStart: posStart,
-			posEnd:   s.Position,
-			literal:  exactTokenValue,
-			children: nil,
+			Token:    token,
+			Line:     s.Line,
+			PosStart: posStart,
+			PosEnd:   s.Position,
+			Literal:  exactTokenValue,
+			Children: nil,
 		}
-		return
-	}
-}
-func SubStringParser(str string) Parser {
-	return func(sr *reader.BaseSymbolReader) (rnode *ResultNode, ok bool, err error) {
 		return
 	}
 }
 
 type ParserNode struct {
-	optional Optional
 	meaning  string
 	parser   Parser
 	children []*ParserNode
 }
-type Optional bool
 
-func New(meaning string, optional Optional, parser Parser) *ParserNode {
+func Req(meaning string, parser Parser) *ParserNode {
 	return &ParserNode{
-		optional: optional,
 		meaning:  meaning,
 		parser:   parser,
 		children: []*ParserNode{},
 	}
 }
-func Seq(meaning string, optional Optional, pns ...*ParserNode) (node *ParserNode) {
+func Seq(meaning string, pns ...*ParserNode) (node *ParserNode) {
 	parser := func(reader *reader.BaseSymbolReader) (rn *ResultNode, ok bool, err error) {
 		rn = &ResultNode{}
 		var childNode *ResultNode
+		var literal strings.Builder
 		for _, pn := range pns {
+			fmt.Printf("\n\tparses node: %s\n", pn.meaning)
 			childNode, ok, err = pn.Parse(reader)
 			if err != nil {
 				return
@@ -119,19 +121,26 @@ func Seq(meaning string, optional Optional, pns ...*ParserNode) (node *ParserNod
 				rn = nil
 				return
 			}
-			rn.children = append(rn.children, childNode)
+			literal.WriteString(childNode.Literal)
+			rn.Children = append(rn.Children, childNode)
 		}
+		fmt.Printf("\nresult node: %#v\n", rn.Children)
+		rn.Line = rn.Children[0].Line
+		rn.PosStart = rn.Children[0].PosStart
+		last := len(rn.Children) - 1
+		rn.PosEnd = rn.Children[last].PosEnd
+		rn.Literal = literal.String()
+		rn.Token = "expression"
 		return
 	}
 	node = &ParserNode{
-		optional: optional,
 		meaning:  meaning,
 		parser:   parser,
 		children: pns,
 	}
 	return
 }
-func Var(meaning string, optional Optional, pns ...*ParserNode) (node *ParserNode) {
+func Var(meaning string, pns ...*ParserNode) (node *ParserNode) {
 	parser := func(reader *reader.BaseSymbolReader) (rn *ResultNode, ok bool, err error) {
 		rn = &ResultNode{}
 		var childNode *ResultNode
@@ -141,21 +150,20 @@ func Var(meaning string, optional Optional, pns ...*ParserNode) (node *ParserNod
 				return
 			}
 			if ok {
-				rn.children = append(rn.children, childNode)
+				rn.Children = append(rn.Children, childNode)
 				break
 			}
 		}
 		return
 	}
 	node = &ParserNode{
-		optional: optional,
 		meaning:  meaning,
 		parser:   parser,
 		children: pns,
 	}
 	return
 }
-func Rep(meaning string, optional Optional, pn *ParserNode) (node *ParserNode) {
+func Rep(meaning string, pn *ParserNode) (node *ParserNode) {
 	parser := func(reader *reader.BaseSymbolReader) (rn *ResultNode, ok bool, err error) {
 		rn = &ResultNode{}
 		var childNode *ResultNode
@@ -167,11 +175,10 @@ func Rep(meaning string, optional Optional, pn *ParserNode) (node *ParserNode) {
 			if !ok {
 				return
 			}
-			rn.children = append(rn.children, childNode)
+			rn.Children = append(rn.Children, childNode)
 		}
 	}
 	node = &ParserNode{
-		optional: optional,
 		meaning:  meaning,
 		parser:   parser,
 		children: []*ParserNode{pn},
@@ -184,10 +191,10 @@ func (pn *ParserNode) Parse(reader *reader.BaseSymbolReader) (result *ResultNode
 }
 
 type ResultNode struct {
-	line     int
-	posStart int
-	posEnd   int
-	token    string
-	literal  string
-	children []*ResultNode
+	Line     int
+	PosStart int
+	PosEnd   int
+	Token    string
+	Literal  string
+	Children []*ResultNode
 }

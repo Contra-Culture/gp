@@ -1,6 +1,8 @@
 package reader
 
 import (
+	"fmt"
+
 	symbolsStore "github.com/Contra-Culture/gp/store"
 )
 
@@ -40,9 +42,11 @@ func (sr *BaseSymbolReader) ReadRune() (r rune, size int, err error) {
 	var s symbolsStore.Symbol
 	s, err = sr.ReadSymbol()
 	if err != nil {
+		fmt.Printf("\n\t\terr: %s", err.Error())
 		return
 	}
 	r = s.Rune
 	size = s.Size
+	fmt.Printf("\n\t\treader.ReadRune() symbol: `%s` -> %#v\n", string(s.Rune), s)
 	return
 }
