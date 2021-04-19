@@ -325,6 +325,51 @@ var _ = Describe("gp", func() {
 			Context("when variant node", func() {
 				Context("when matches", func() {
 					It("returns result node and ok", func() {
+						sr := strings.NewReader("func some text here")
+						s, err := store.New(sr)
+						Expect(err).NotTo(HaveOccurred())
+						r := reader.New(s, 0)
+						funcTokenParser := gp.New("func keyword", gp.ExactTokenParser("keyword", "func"))
+						defTokenParser := gp.New("def keyword", gp.ExactTokenParser("keyword", "def"))
+						rep := gp.Var("variant", funcTokenParser, defTokenParser)
+						result, ok, err := rep.Parse(r)
+						Expect(err).NotTo(HaveOccurred())
+						Expect(ok).To(BeTrue())
+						Expect(result.Lines).To(Equal([]int{1, 1}))
+						Expect(result.Literal).To(Equal("func"))
+						Expect(result.PosStart).To(Equal(1))
+						Expect(result.PosEnd).To(Equal(4))
+						Expect(result.Token).To(Equal(""))
+						Expect(result.Children).To(HaveLen(1))
+						Expect(result.Children[0]).To(Equal(&gp.ResultNode{
+							Lines:    []int{1, 1},
+							PosStart: 1,
+							PosEnd:   4,
+							Token:    "keyword",
+							Literal:  "func",
+							Children: nil,
+						}))
+						sr = strings.NewReader("def some text here")
+						s, err = store.New(sr)
+						Expect(err).NotTo(HaveOccurred())
+						r = reader.New(s, 0)
+						result, ok, err = rep.Parse(r)
+						Expect(err).NotTo(HaveOccurred())
+						Expect(ok).To(BeTrue())
+						Expect(result.Lines).To(Equal([]int{1, 1}))
+						Expect(result.Literal).To(Equal("def"))
+						Expect(result.PosStart).To(Equal(1))
+						Expect(result.PosEnd).To(Equal(3))
+						Expect(result.Token).To(Equal(""))
+						Expect(result.Children).To(HaveLen(1))
+						Expect(result.Children[0]).To(Equal(&gp.ResultNode{
+							Lines:    []int{1, 1},
+							PosStart: 1,
+							PosEnd:   3,
+							Token:    "keyword",
+							Literal:  "def",
+							Children: nil,
+						}))
 
 					})
 				})

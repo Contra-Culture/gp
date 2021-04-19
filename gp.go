@@ -173,6 +173,7 @@ func Var(meaning string, pns ...*ParserNode) (node *ParserNode) {
 	parser := func(reader *reader.BaseSymbolReader) (rn *ResultNode, ok bool, err error) {
 		rn = &ResultNode{}
 		var childNode *ResultNode
+		_reader := reader.Continuation()
 		for _, pn := range pns {
 			childNode, ok, err = pn.Parse(reader)
 			if err != nil {
@@ -181,7 +182,16 @@ func Var(meaning string, pns ...*ParserNode) (node *ParserNode) {
 			if ok {
 				rn.Children = append(rn.Children, childNode)
 				break
+			} else {
+				reader = _reader.Continuation()
 			}
+		}
+		ok = len(rn.Children) > 0
+		if ok {
+			rn.Lines = rn.Children[0].Lines
+			rn.Literal = rn.Children[0].Literal
+			rn.PosStart = rn.Children[0].PosStart
+			rn.PosEnd = rn.Children[0].PosEnd
 		}
 		return
 	}
