@@ -18,6 +18,11 @@ var _ = Describe("gp", func() {
 				Expect(pn).NotTo(BeNil())
 			})
 		})
+		Describe("Opt()", func() {
+			It("returns parser node", func() {
+
+			})
+		})
 		Describe("Var()", func() {
 			It("returns parser node", func() {
 				def := gp.New("method definition", gp.ExactTokenParser("keyword", "def"))
@@ -89,7 +94,7 @@ var _ = Describe("gp", func() {
 						Expect(err).NotTo(HaveOccurred())
 						r := reader.New(s, 0)
 						funcToken := gp.New("function definition keyword", gp.ExactTokenParser("keyword", "func"))
-						identifierParser, err := gp.PatternTokenParser("identifier", "^([\\w]+)")
+						identifierParser, err := gp.PatternTokenParser("identifier", "^([a-zA-Z]+)")
 						Expect(err).NotTo(HaveOccurred())
 						identifierToken := gp.New("function name", identifierParser)
 						spaceToken := gp.New("space", gp.ExactTokenParser("space", " "))
@@ -113,12 +118,100 @@ var _ = Describe("gp", func() {
 						result, ok, err := funcDef.Parse(r)
 						Expect(err).NotTo(HaveOccurred())
 						Expect(ok).To(BeTrue())
-						Expect(result.Lines).To(Equal([]int{1}))
+						Expect(result.Lines).To(Equal([]int{1, 1}))
 						Expect(result.PosStart).To(Equal(1))
-						Expect(result.PosEnd).To(Equal(14))
-						Expect(result.Literal).To(Equal(""))
-						Expect(result.Token).To(Equal(""))
-						Expect(result.Children).To(BeEmpty())
+						Expect(result.PosEnd).To(Equal(24))
+						Expect(result.Literal).To(Equal("func myFunc() { ignore }"))
+						Expect(result.Token).To(Equal("expression"))
+						Expect(result.Children).To(HaveLen(11))
+						Expect(result.Children[0]).To(Equal(&gp.ResultNode{
+							Lines:    []int{1, 1},
+							PosStart: 1,
+							PosEnd:   4,
+							Token:    "keyword",
+							Literal:  "func",
+							Children: nil,
+						}))
+						Expect(result.Children[1]).To(Equal(&gp.ResultNode{
+							Lines:    []int{1, 1},
+							PosStart: 5,
+							PosEnd:   5,
+							Token:    "space",
+							Literal:  " ",
+							Children: nil,
+						}))
+						Expect(result.Children[2]).To(Equal(&gp.ResultNode{
+							Lines:    []int{1, 1},
+							PosStart: 6,
+							PosEnd:   11,
+							Token:    "identifier",
+							Literal:  "myFunc",
+							Children: nil,
+						}))
+						Expect(result.Children[3]).To(Equal(&gp.ResultNode{
+							Lines:    []int{1, 1},
+							PosStart: 12,
+							PosEnd:   12,
+							Token:    "opening bracket",
+							Literal:  "(",
+							Children: nil,
+						}))
+						Expect(result.Children[4]).To(Equal(&gp.ResultNode{
+							Lines:    []int{1, 1},
+							PosStart: 13,
+							PosEnd:   13,
+							Token:    "closing bracket",
+							Literal:  ")",
+							Children: nil,
+						}))
+						Expect(result.Children[5]).To(Equal(&gp.ResultNode{
+							Lines:    []int{1, 1},
+							PosStart: 14,
+							PosEnd:   14,
+							Token:    "space",
+							Literal:  " ",
+							Children: nil,
+						}))
+						Expect(result.Children[6]).To(Equal(&gp.ResultNode{
+							Lines:    []int{1, 1},
+							PosStart: 15,
+							PosEnd:   15,
+							Token:    "opening curly bracket",
+							Literal:  "{",
+							Children: nil,
+						}))
+						Expect(result.Children[7]).To(Equal(&gp.ResultNode{
+							Lines:    []int{1, 1},
+							PosStart: 16,
+							PosEnd:   16,
+							Token:    "space",
+							Literal:  " ",
+							Children: nil,
+						}))
+						Expect(result.Children[8]).To(Equal(&gp.ResultNode{
+							Lines:    []int{1, 1},
+							PosStart: 17,
+							PosEnd:   22,
+							Token:    "identifier",
+							Literal:  "ignore",
+							Children: nil,
+						}))
+						Expect(result.Children[9]).To(Equal(&gp.ResultNode{
+							Lines:    []int{1, 1},
+							PosStart: 23,
+							PosEnd:   23,
+							Token:    "space",
+							Literal:  " ",
+							Children: nil,
+						}))
+						Expect(result.Children[10]).To(Equal(&gp.ResultNode{
+							Lines:    []int{1, 1},
+							PosStart: 24,
+							PosEnd:   24,
+							Token:    "closing curly bracket",
+							Literal:  "}",
+							Children: nil,
+						}))
 					})
 				})
 				Context("when not matches", func() {

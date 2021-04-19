@@ -44,18 +44,27 @@ func PatternTokenParser(token string, pattern string) (parser Parser, err error)
 		return
 	}
 	parser = func(sr *reader.BaseSymbolReader) (rnode *ResultNode, ok bool, err error) {
-		loc := re.FindReaderIndex(sr)
+		forSearch := sr.Continuation()
+		loc := re.FindReaderIndex(forSearch)
 		ok = loc != nil
 		if !ok {
 			return
 		}
+		var literal strings.Builder
+		var r rune
+		for i := loc[0]; i < loc[1]; i++ {
+			r, _, err = sr.ReadRune()
+			if err != nil {
+				return
+			}
+			literal.WriteRune(r)
+		}
 		rnode = &ResultNode{
 			Token:    token,
-			Lines:    []int{sr.Frame()[0].Line, sr.Frame()[0].Line},
-			PosStart: sr.Frame()[0].Position, //fix
-			PosEnd:   sr.Frame()[0].Position,
-			Literal:  "dumb",
-			Children: []*ResultNode{},
+			Lines:    []int{sr.Frame()[0].Line, sr.Frame()[len(sr.Frame())-1].Line},
+			PosStart: sr.Frame()[0].Position,
+			PosEnd:   sr.Frame()[len(sr.Frame())-1].Position,
+			Literal:  literal.String(),
 		}
 		return
 	}
@@ -71,8 +80,10 @@ func ExactTokenParser(token string, exactTokenValue string) Parser {
 		for _, expectedRune := range expectedRunes {
 			s, err = sr.ReadSymbol()
 			if err != nil {
+				fmt.Printf("\n\tExactTokenParser: error %s\n", err.Error())
 				return
 			}
+			fmt.Printf("\n\tExactTokenParser: expected rune %s , got: %s, %#v\n", string(expectedRune), string(s.Rune), s.Rune)
 			if posStart == 0 {
 				posStart = s.Position
 			}
@@ -123,7 +134,6 @@ func Opt(meaning string, pn *ParserNode) *ParserNode {
 		children: []*ParserNode{},
 	}
 }
-
 func Seq(meaning string, pns ...*ParserNode) (node *ParserNode) {
 	parser := func(reader *reader.BaseSymbolReader) (rn *ResultNode, ok bool, err error) {
 		rn = &ResultNode{}
@@ -141,6 +151,7 @@ func Seq(meaning string, pns ...*ParserNode) (node *ParserNode) {
 			}
 			literal.WriteString(childNode.Literal)
 			rn.Children = append(rn.Children, childNode)
+			reader = reader.Continuation()
 		}
 		fmt.Printf("\nresult node: %#v\n", rn.Children)
 		rn.Lines = rn.Children[0].Lines
