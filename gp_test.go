@@ -14,33 +14,33 @@ var _ = Describe("gp", func() {
 	Context("creation", func() {
 		Describe("New()", func() {
 			It("returns parser node", func() {
-				pn := gp.Req("test purpose", gp.ExactTokenParser("test", "test"))
+				pn := gp.New("test purpose", gp.ExactTokenParser("test", "test"))
 				Expect(pn).NotTo(BeNil())
 			})
 		})
 		Describe("Var()", func() {
 			It("returns parser node", func() {
-				def := gp.Req("method definition", gp.ExactTokenParser("keyword", "def"))
-				fnc := gp.Req("function definition", gp.ExactTokenParser("keyword", "func"))
+				def := gp.New("method definition", gp.ExactTokenParser("keyword", "def"))
+				fnc := gp.New("function definition", gp.ExactTokenParser("keyword", "func"))
 				pn := gp.Var("test purpose", def, fnc)
 				Expect(pn).NotTo(BeNil())
 			})
 		})
 		Describe("Seq()", func() {
 			It("returns parser node", func() {
-				fnc := gp.Req("function definition keyword", gp.ExactTokenParser("keyword", "func"))
+				fnc := gp.New("function definition keyword", gp.ExactTokenParser("keyword", "func"))
 				identifierParser, err := gp.PatternTokenParser("indentifier", "/A.?/Z")
 				Expect(err).NotTo(HaveOccurred())
-				name := gp.Req("function name", identifierParser)
-				openBracket := gp.Req("open bracket", gp.ExactTokenParser("bracket", "("))
-				closedBracket := gp.Req("closed bracket", gp.ExactTokenParser("bracket", ")"))
+				name := gp.New("function name", identifierParser)
+				openBracket := gp.New("open bracket", gp.ExactTokenParser("bracket", "("))
+				closedBracket := gp.New("closed bracket", gp.ExactTokenParser("bracket", ")"))
 				pn := gp.Seq("func definition", fnc, name, openBracket, closedBracket)
 				Expect(pn).NotTo(BeNil())
 			})
 		})
 		Describe("Rep()", func() {
 			It("returns parser node", func() {
-				fnc := gp.Req("function definition keyword", gp.ExactTokenParser("keyword", "func"))
+				fnc := gp.New("function definition keyword", gp.ExactTokenParser("keyword", "func"))
 				pn := gp.Rep("rep", fnc)
 				Expect(pn).NotTo(BeNil())
 			})
@@ -55,7 +55,7 @@ var _ = Describe("gp", func() {
 						s, err := store.New(sr)
 						Expect(err).NotTo(HaveOccurred())
 						r := reader.New(s, 0)
-						funcKwd := gp.Req("function definition", gp.ExactTokenParser("keyword", "func"))
+						funcKwd := gp.New("function definition", gp.ExactTokenParser("keyword", "func"))
 						result, ok, err := funcKwd.Parse(r)
 						Expect(err).NotTo(HaveOccurred())
 						Expect(ok).To(BeTrue())
@@ -73,7 +73,7 @@ var _ = Describe("gp", func() {
 						s, err := store.New(sr)
 						Expect(err).NotTo(HaveOccurred())
 						r := reader.New(s, 0)
-						funcKwd := gp.Req("function definition", gp.ExactTokenParser("keyword", "func"))
+						funcKwd := gp.New("function definition", gp.ExactTokenParser("keyword", "func"))
 						result, ok, err := funcKwd.Parse(r)
 						Expect(err).NotTo(HaveOccurred())
 						Expect(ok).To(BeFalse())
@@ -88,15 +88,15 @@ var _ = Describe("gp", func() {
 						s, err := store.New(sr)
 						Expect(err).NotTo(HaveOccurred())
 						r := reader.New(s, 0)
-						funcToken := gp.Req("function definition keyword", gp.ExactTokenParser("keyword", "func"))
+						funcToken := gp.New("function definition keyword", gp.ExactTokenParser("keyword", "func"))
 						identifierParser, err := gp.PatternTokenParser("identifier", "^([\\w]+)")
 						Expect(err).NotTo(HaveOccurred())
-						identifierToken := gp.Req("function name", identifierParser)
-						spaceToken := gp.Req("space", gp.ExactTokenParser("space", " "))
-						openingBracketToken := gp.Req("opening bracket", gp.ExactTokenParser("opening bracket", "("))
-						closingBracketToken := gp.Req("closing bracket", gp.ExactTokenParser("closing bracket", ")"))
-						openingCurlyBracketToken := gp.Req("opening curly bracket", gp.ExactTokenParser("opening curly bracket", "{"))
-						closingCurlyBracketToken := gp.Req("closing curly bracket", gp.ExactTokenParser("closing curly bracket", "}"))
+						identifierToken := gp.New("function name", identifierParser)
+						spaceToken := gp.New("space", gp.ExactTokenParser("space", " "))
+						openingBracketToken := gp.New("opening bracket", gp.ExactTokenParser("opening bracket", "("))
+						closingBracketToken := gp.New("closing bracket", gp.ExactTokenParser("closing bracket", ")"))
+						openingCurlyBracketToken := gp.New("opening curly bracket", gp.ExactTokenParser("opening curly bracket", "{"))
+						closingCurlyBracketToken := gp.New("closing curly bracket", gp.ExactTokenParser("closing curly bracket", "}"))
 						funcDef := gp.Seq("function definition",
 							funcToken,
 							spaceToken,

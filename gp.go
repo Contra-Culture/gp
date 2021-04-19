@@ -99,13 +99,31 @@ type ParserNode struct {
 	children []*ParserNode
 }
 
-func Req(meaning string, parser Parser) *ParserNode {
+func New(meaning string, parser Parser) *ParserNode {
 	return &ParserNode{
 		meaning:  meaning,
 		parser:   parser,
 		children: []*ParserNode{},
 	}
 }
+func Opt(meaning string, pn *ParserNode) *ParserNode {
+	parser := func(reader *reader.BaseSymbolReader) (result *ResultNode, ok bool, err error) {
+		result, ok, err = pn.Parse(reader)
+		if err != nil {
+			return
+		}
+		if !ok {
+			return
+		}
+		return
+	}
+	return &ParserNode{
+		meaning:  meaning,
+		parser:   parser,
+		children: []*ParserNode{},
+	}
+}
+
 func Seq(meaning string, pns ...*ParserNode) (node *ParserNode) {
 	parser := func(reader *reader.BaseSymbolReader) (rn *ResultNode, ok bool, err error) {
 		rn = &ResultNode{}
