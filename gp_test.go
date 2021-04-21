@@ -72,7 +72,7 @@ var _ = Describe("gp", func() {
 							Lines:    []int{1, 1},
 							PosStart: 1,
 							PosEnd:   4,
-							Token:    "testToken",
+							Token:    "",
 							Literal:  "test",
 							Children: []*gp.ResultNode{
 								{
@@ -427,6 +427,269 @@ var _ = Describe("gp", func() {
 							Children: nil,
 						}))
 
+					})
+				})
+				Context("when not matches", func() {
+					It("returns not ok", func() {
+
+					})
+				})
+			})
+			Context("when optional node", func() {
+				Context("when matches", func() {
+					It("returns result and ok", func() {
+						sr := strings.NewReader("func myFunc() { ignore }")
+						s, err := store.New(sr)
+						Expect(err).NotTo(HaveOccurred())
+						r := reader.New(s, 0)
+						funcToken := gp.New("function definition keyword", gp.ExactTokenParser("keyword", "func"))
+						identifierParser, err := gp.PatternTokenParser("identifier", "^([a-zA-Z]+)")
+						Expect(err).NotTo(HaveOccurred())
+						identifierToken := gp.Opt("optional function name", gp.New("function name", identifierParser))
+						spaceToken := gp.New("space", gp.ExactTokenParser("space", " "))
+						openingBracketToken := gp.New("opening bracket", gp.ExactTokenParser("opening bracket", "("))
+						closingBracketToken := gp.New("closing bracket", gp.ExactTokenParser("closing bracket", ")"))
+						openingCurlyBracketToken := gp.New("opening curly bracket", gp.ExactTokenParser("opening curly bracket", "{"))
+						closingCurlyBracketToken := gp.New("closing curly bracket", gp.ExactTokenParser("closing curly bracket", "}"))
+						funcDef := gp.Seq("function definition",
+							funcToken,
+							spaceToken,
+							identifierToken,
+							openingBracketToken,
+							closingBracketToken,
+							spaceToken,
+							openingCurlyBracketToken,
+							spaceToken,
+							identifierToken,
+							spaceToken,
+							closingCurlyBracketToken,
+						)
+						result, ok, err := funcDef.Parse(r)
+						Expect(err).NotTo(HaveOccurred())
+						Expect(ok).To(BeTrue())
+						Expect(result.Lines).To(Equal([]int{1, 1}))
+						Expect(result.PosStart).To(Equal(1))
+						Expect(result.PosEnd).To(Equal(24))
+						Expect(result.Literal).To(Equal("func myFunc() { ignore }"))
+						Expect(result.Token).To(Equal("expression"))
+						Expect(result.Children).To(HaveLen(11))
+						Expect(result.Children[0]).To(Equal(&gp.ResultNode{
+							Lines:    []int{1, 1},
+							PosStart: 1,
+							PosEnd:   4,
+							Token:    "keyword",
+							Literal:  "func",
+							Children: nil,
+						}))
+						Expect(result.Children[1]).To(Equal(&gp.ResultNode{
+							Lines:    []int{1, 1},
+							PosStart: 5,
+							PosEnd:   5,
+							Token:    "space",
+							Literal:  " ",
+							Children: nil,
+						}))
+						Expect(result.Children[2]).To(Equal(&gp.ResultNode{
+							Lines:    []int{1, 1},
+							PosStart: 6,
+							PosEnd:   11,
+							Token:    "",
+							Literal:  "myFunc",
+							Children: []*gp.ResultNode{
+								{
+									Lines:    []int{1, 1},
+									PosStart: 6,
+									PosEnd:   11,
+									Token:    "identifier",
+									Literal:  "myFunc",
+									Children: nil,
+								},
+							},
+						}))
+						Expect(result.Children[3]).To(Equal(&gp.ResultNode{
+							Lines:    []int{1, 1},
+							PosStart: 12,
+							PosEnd:   12,
+							Token:    "opening bracket",
+							Literal:  "(",
+							Children: nil,
+						}))
+						Expect(result.Children[4]).To(Equal(&gp.ResultNode{
+							Lines:    []int{1, 1},
+							PosStart: 13,
+							PosEnd:   13,
+							Token:    "closing bracket",
+							Literal:  ")",
+							Children: nil,
+						}))
+						Expect(result.Children[5]).To(Equal(&gp.ResultNode{
+							Lines:    []int{1, 1},
+							PosStart: 14,
+							PosEnd:   14,
+							Token:    "space",
+							Literal:  " ",
+							Children: nil,
+						}))
+						Expect(result.Children[6]).To(Equal(&gp.ResultNode{
+							Lines:    []int{1, 1},
+							PosStart: 15,
+							PosEnd:   15,
+							Token:    "opening curly bracket",
+							Literal:  "{",
+							Children: nil,
+						}))
+						Expect(result.Children[7]).To(Equal(&gp.ResultNode{
+							Lines:    []int{1, 1},
+							PosStart: 16,
+							PosEnd:   16,
+							Token:    "space",
+							Literal:  " ",
+							Children: nil,
+						}))
+						Expect(result.Children[8]).To(Equal(&gp.ResultNode{
+							Lines:    []int{1, 1},
+							PosStart: 17,
+							PosEnd:   22,
+							Token:    "",
+							Literal:  "ignore",
+							Children: []*gp.ResultNode{
+								{
+									Lines:    []int{1, 1},
+									PosStart: 17,
+									PosEnd:   22,
+									Token:    "identifier",
+									Literal:  "ignore",
+									Children: nil,
+								},
+							},
+						}))
+						Expect(result.Children[9]).To(Equal(&gp.ResultNode{
+							Lines:    []int{1, 1},
+							PosStart: 23,
+							PosEnd:   23,
+							Token:    "space",
+							Literal:  " ",
+							Children: nil,
+						}))
+						Expect(result.Children[10]).To(Equal(&gp.ResultNode{
+							Lines:    []int{1, 1},
+							PosStart: 24,
+							PosEnd:   24,
+							Token:    "closing curly bracket",
+							Literal:  "}",
+							Children: nil,
+						}))
+						// without identifier
+						sr = strings.NewReader("func () { ignore }")
+						s, err = store.New(sr)
+						Expect(err).NotTo(HaveOccurred())
+						r = reader.New(s, 0)
+						result, ok, err = funcDef.Parse(r)
+						Expect(err).NotTo(HaveOccurred())
+						Expect(ok).To(BeTrue())
+						Expect(result.Lines).To(Equal([]int{1, 1}))
+						Expect(result.PosStart).To(Equal(1))
+						Expect(result.PosEnd).To(Equal(18))
+						Expect(result.Literal).To(Equal("func () { ignore }"))
+						Expect(result.Token).To(Equal("expression"))
+						Expect(result.Children).To(HaveLen(11))
+						Expect(result.Children[0]).To(Equal(&gp.ResultNode{
+							Lines:    []int{1, 1},
+							PosStart: 1,
+							PosEnd:   4,
+							Token:    "keyword",
+							Literal:  "func",
+							Children: nil,
+						}))
+						Expect(result.Children[1]).To(Equal(&gp.ResultNode{
+							Lines:    []int{1, 1},
+							PosStart: 5,
+							PosEnd:   5,
+							Token:    "space",
+							Literal:  " ",
+							Children: nil,
+						}))
+						Expect(result.Children[2]).To(Equal(&gp.ResultNode{
+							Lines:    nil,
+							PosStart: 0,
+							PosEnd:   0,
+							Token:    "",
+							Literal:  "",
+							Children: nil,
+						}))
+						Expect(result.Children[3]).To(Equal(&gp.ResultNode{
+							Lines:    []int{1, 1},
+							PosStart: 6,
+							PosEnd:   6,
+							Token:    "opening bracket",
+							Literal:  "(",
+							Children: nil,
+						}))
+						Expect(result.Children[4]).To(Equal(&gp.ResultNode{
+							Lines:    []int{1, 1},
+							PosStart: 7,
+							PosEnd:   7,
+							Token:    "closing bracket",
+							Literal:  ")",
+							Children: nil,
+						}))
+						Expect(result.Children[5]).To(Equal(&gp.ResultNode{
+							Lines:    []int{1, 1},
+							PosStart: 8,
+							PosEnd:   8,
+							Token:    "space",
+							Literal:  " ",
+							Children: nil,
+						}))
+						Expect(result.Children[6]).To(Equal(&gp.ResultNode{
+							Lines:    []int{1, 1},
+							PosStart: 9,
+							PosEnd:   9,
+							Token:    "opening curly bracket",
+							Literal:  "{",
+							Children: nil,
+						}))
+						Expect(result.Children[7]).To(Equal(&gp.ResultNode{
+							Lines:    []int{1, 1},
+							PosStart: 10,
+							PosEnd:   10,
+							Token:    "space",
+							Literal:  " ",
+							Children: nil,
+						}))
+						Expect(result.Children[8]).To(Equal(&gp.ResultNode{
+							Lines:    []int{1, 1},
+							PosStart: 11,
+							PosEnd:   16,
+							Token:    "",
+							Literal:  "ignore",
+							Children: []*gp.ResultNode{
+								{
+									Lines:    []int{1, 1},
+									PosStart: 11,
+									PosEnd:   16,
+									Token:    "identifier",
+									Literal:  "ignore",
+									Children: nil,
+								},
+							},
+						}))
+						Expect(result.Children[9]).To(Equal(&gp.ResultNode{
+							Lines:    []int{1, 1},
+							PosStart: 17,
+							PosEnd:   17,
+							Token:    "space",
+							Literal:  " ",
+							Children: nil,
+						}))
+						Expect(result.Children[10]).To(Equal(&gp.ResultNode{
+							Lines:    []int{1, 1},
+							PosStart: 18,
+							PosEnd:   18,
+							Token:    "closing curly bracket",
+							Literal:  "}",
+							Children: nil,
+						}))
 					})
 				})
 				Context("when not matches", func() {

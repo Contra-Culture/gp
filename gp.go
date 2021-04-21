@@ -104,6 +104,8 @@ func ExactTokenParser(token string, exactTokenValue string) Parser {
 	}
 }
 
+const NO_TOKEN = ""
+
 type ParserNode struct {
 	meaning  string
 	parser   Parser
@@ -128,7 +130,6 @@ func Opt(meaning string, pn *ParserNode) *ParserNode {
 		if ok {
 			result.Lines = rn.Lines
 			result.Literal = rn.Literal
-			result.Token = "testToken"
 			result.PosStart = rn.PosStart
 			result.PosEnd = rn.PosEnd
 			result.Children = []*ResultNode{rn}
