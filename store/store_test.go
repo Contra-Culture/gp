@@ -561,5 +561,238 @@ var _ = Describe("store", func() {
 				Expect(li[4]).To(Equal(36))
 			})
 		})
+		Describe(".GetRange()", func() {
+			Context("when correct range", func() {
+				It("returns symbols range", func() {
+					ss, err := store.GetRange(0, 35)
+					Expect(err).NotTo(HaveOccurred())
+					Expect(ss).To(HaveLen(36))
+					Expect(ss[0]).To(Equal(Symbol{
+						Rune:     's',
+						Size:     1,
+						Line:     1,
+						Position: 1,
+					}))
+					Expect(ss[1]).To(Equal(Symbol{
+						Rune:     'o',
+						Size:     1,
+						Line:     1,
+						Position: 2,
+					}))
+					Expect(ss[2]).To(Equal(Symbol{
+						Rune:     'm',
+						Size:     1,
+						Line:     1,
+						Position: 3,
+					}))
+					Expect(ss[3]).To(Equal(Symbol{
+						Rune:     'e',
+						Size:     1,
+						Line:     1,
+						Position: 4,
+					}))
+					Expect(ss[4]).To(Equal(Symbol{
+						Rune:     ' ',
+						Size:     1,
+						Line:     1,
+						Position: 5,
+					}))
+					Expect(ss[5]).To(Equal(Symbol{
+						Rune:     'c',
+						Size:     1,
+						Line:     1,
+						Position: 6,
+					}))
+					Expect(ss[6]).To(Equal(Symbol{
+						Rune:     'o',
+						Size:     1,
+						Line:     1,
+						Position: 7,
+					}))
+					Expect(ss[7]).To(Equal(Symbol{
+						Rune:     'n',
+						Size:     1,
+						Line:     1,
+						Position: 8,
+					}))
+					Expect(ss[8]).To(Equal(Symbol{
+						Rune:     't',
+						Size:     1,
+						Line:     1,
+						Position: 9,
+					}))
+					Expect(ss[9]).To(Equal(Symbol{
+						Rune:     'e',
+						Size:     1,
+						Line:     1,
+						Position: 10,
+					}))
+					Expect(ss[10]).To(Equal(Symbol{
+						Rune:     'n',
+						Size:     1,
+						Line:     1,
+						Position: 11,
+					}))
+					Expect(ss[11]).To(Equal(Symbol{
+						Rune:     't',
+						Size:     1,
+						Line:     1,
+						Position: 12,
+					}))
+					Expect(ss[12]).To(Equal(Symbol{
+						Rune:     '\n',
+						Size:     1,
+						Line:     1,
+						Position: 13,
+					}))
+					Expect(ss[13]).To(Equal(Symbol{
+						Rune:     'h',
+						Size:     1,
+						Line:     2,
+						Position: 1,
+					}))
+					Expect(ss[14]).To(Equal(Symbol{
+						Rune:     'e',
+						Size:     1,
+						Line:     2,
+						Position: 2,
+					}))
+					Expect(ss[15]).To(Equal(Symbol{
+						Rune:     'r',
+						Size:     1,
+						Line:     2,
+						Position: 3,
+					}))
+					Expect(ss[16]).To(Equal(Symbol{
+						Rune:     'e',
+						Size:     1,
+						Line:     2,
+						Position: 4,
+					}))
+					Expect(ss[17]).To(Equal(Symbol{
+						Rune:     '\n',
+						Size:     1,
+						Line:     2,
+						Position: 5,
+					}))
+					Expect(ss[18]).To(Equal(Symbol{
+						Rune:     'f',
+						Size:     1,
+						Line:     3,
+						Position: 1,
+					}))
+					Expect(ss[19]).To(Equal(Symbol{
+						Rune:     'o',
+						Size:     1,
+						Line:     3,
+						Position: 2,
+					}))
+					Expect(ss[20]).To(Equal(Symbol{
+						Rune:     'r',
+						Size:     1,
+						Line:     3,
+						Position: 3,
+					}))
+					Expect(ss[21]).To(Equal(Symbol{
+						Rune:     ' ',
+						Size:     1,
+						Line:     3,
+						Position: 4,
+					}))
+					Expect(ss[22]).To(Equal(Symbol{
+						Rune:     't',
+						Size:     1,
+						Line:     3,
+						Position: 5,
+					}))
+					Expect(ss[23]).To(Equal(Symbol{
+						Rune:     'e',
+						Size:     1,
+						Line:     3,
+						Position: 6,
+					}))
+					Expect(ss[24]).To(Equal(Symbol{
+						Rune:     's',
+						Size:     1,
+						Line:     3,
+						Position: 7,
+					}))
+					Expect(ss[25]).To(Equal(Symbol{
+						Rune:     't',
+						Size:     1,
+						Line:     3,
+						Position: 8,
+					}))
+					Expect(ss[26]).To(Equal(Symbol{
+						Rune:     '\n',
+						Size:     1,
+						Line:     3,
+						Position: 9,
+					}))
+					Expect(ss[27]).To(Equal(Symbol{
+						Rune:     'p',
+						Size:     1,
+						Line:     4,
+						Position: 1,
+					}))
+					Expect(ss[28]).To(Equal(Symbol{
+						Rune:     'u',
+						Size:     1,
+						Line:     4,
+						Position: 2,
+					}))
+					Expect(ss[29]).To(Equal(Symbol{
+						Rune:     'r',
+						Size:     1,
+						Line:     4,
+						Position: 3,
+					}))
+					Expect(ss[30]).To(Equal(Symbol{
+						Rune:     'p',
+						Size:     1,
+						Line:     4,
+						Position: 4,
+					}))
+					Expect(ss[31]).To(Equal(Symbol{
+						Rune:     'o',
+						Size:     1,
+						Line:     4,
+						Position: 5,
+					}))
+					Expect(ss[32]).To(Equal(Symbol{
+						Rune:     's',
+						Size:     1,
+						Line:     4,
+						Position: 6,
+					}))
+					Expect(ss[33]).To(Equal(Symbol{
+						Rune:     'e',
+						Size:     1,
+						Line:     4,
+						Position: 7,
+					}))
+					Expect(ss[34]).To(Equal(Symbol{
+						Rune:     's',
+						Size:     1,
+						Line:     4,
+						Position: 8,
+					}))
+					Expect(ss[35]).To(Equal(Symbol{
+						Rune:     '\n',
+						Size:     1,
+						Line:     4,
+						Position: 9,
+					}))
+				})
+			})
+			Context("when wrong range", func() {
+				It("returns error", func() {
+					ss, err := store.GetRange(0, 36)
+					Expect(err).To(HaveOccurred())
+					Expect(err.Error()).To(Equal("36 index is out of symbols range (lenght: 36)"))
+					Expect(ss).To(BeNil())
+				})
+			})
+		})
 	})
 })

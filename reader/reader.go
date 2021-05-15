@@ -8,34 +8,36 @@ import (
 
 type BaseSymbolReader struct {
 	beginIdx int
+	cursor   int
 	store    *symbolsStore.SymbolsStore
-	frame    []symbolsStore.Symbol
+	parent   *BaseSymbolReader
 }
 
 func New(store *symbolsStore.SymbolsStore, beginIdx int) *BaseSymbolReader {
 	return &BaseSymbolReader{
 		beginIdx: beginIdx,
+		cursor:   beginIdx,
 		store:    store,
-		frame:    []symbolsStore.Symbol{},
 	}
 }
 func (sr *BaseSymbolReader) ReadSymbol() (s symbolsStore.Symbol, err error) {
-	cursor := len(sr.frame)
-	s, err = sr.store.GetSymbol(cursor)
+	s, err = sr.store.GetSymbol(sr.cursor)
 	if err != nil {
 		return
 	}
-	sr.frame = append(sr.frame, s)
+	sr.cursor++
 	return
 }
 func (sr *BaseSymbolReader) Frame() []symbolsStore.Symbol {
-	return sr.frame[sr.beginIdx:]
+	symbols, _ := sr.store.GetRange(sr.beginIdx, sr.cursor-1)
+	return symbols
 }
 func (sr *BaseSymbolReader) Continuation() *BaseSymbolReader {
 	return &BaseSymbolReader{
 		store:    sr.store,
-		beginIdx: len(sr.frame),
-		frame:    sr.frame,
+		beginIdx: sr.cursor,
+		cursor:   sr.cursor,
+		parent:   sr,
 	}
 }
 func (sr *BaseSymbolReader) ReadRune() (r rune, size int, err error) {
@@ -49,4 +51,7 @@ func (sr *BaseSymbolReader) ReadRune() (r rune, size int, err error) {
 	size = s.Size
 	fmt.Printf("\n\t\treader.ReadRune() symbol: `%s` -> %#v\n", string(s.Rune), s)
 	return
+}
+func (sr *BaseSymbolReader) CommitToParent() {
+	sr.parent.cursor = sr.cursor
 }

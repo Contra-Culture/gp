@@ -3,21 +3,38 @@ package store
 import (
 	"fmt"
 	"io"
+	"strings"
 )
 
-type Symbol struct {
-	Rune     rune
-	Size     int
-	Line     int
-	Position int
-}
-
-type SymbolsStore struct {
-	symbolsIndex []Symbol
-	linesIndex   []int
-}
+type (
+	Symbols []Symbol
+	Symbol  struct {
+		Rune     rune
+		Size     int
+		Line     int
+		Position int
+	}
+	SymbolsStore struct {
+		symbolsIndex Symbols
+		linesIndex   []int
+	}
+)
 
 const NewLine = '\n'
+
+func (ss Symbols) String() string {
+	var sb strings.Builder
+	for _, s := range ss {
+		sb.WriteRune(s.Rune)
+	}
+	return sb.String()
+}
+func (ss Symbols) Runes() (runes []rune) {
+	for _, s := range ss {
+		runes = append(runes, s.Rune)
+	}
+	return
+}
 
 func New(source io.RuneReader) (store *SymbolsStore, err error) {
 	store = &SymbolsStore{
@@ -58,7 +75,25 @@ func New(source io.RuneReader) (store *SymbolsStore, err error) {
 	}
 	return
 }
-
+func (s *SymbolsStore) GetRange(start int, end int) (symbols Symbols, err error) {
+	if start > end {
+		err = fmt.Errorf("start index (given: %d) should be less than the end index (given: %d)", start, end)
+		return
+	}
+	symbolsQnt := len(s.symbolsIndex)
+	if start >= symbolsQnt {
+		err = fmt.Errorf("%d index is out of symbols range (lenght: %d)", start, symbolsQnt)
+		return
+	}
+	if end >= symbolsQnt {
+		err = fmt.Errorf("%d index is out of symbols range (lenght: %d)", end, symbolsQnt)
+		return
+	}
+	for i := start; i <= end; i++ {
+		symbols = append(symbols, s.symbolsIndex[i])
+	}
+	return
+}
 func (s *SymbolsStore) GetSymbol(idx int) (symbol Symbol, err error) {
 	symbolsQnt := len(s.symbolsIndex)
 	if idx >= symbolsQnt {
@@ -68,7 +103,7 @@ func (s *SymbolsStore) GetSymbol(idx int) (symbol Symbol, err error) {
 	symbol = s.symbolsIndex[idx]
 	return
 }
-func (s *SymbolsStore) GetLine(idx int) (symbols []Symbol, err error) {
+func (s *SymbolsStore) GetLine(idx int) (symbols Symbols, err error) {
 	linesQnt := len(s.linesIndex)
 	if idx >= linesQnt {
 		err = fmt.Errorf("line index %d is out of lines range (length: %d)", idx, linesQnt)
@@ -106,4 +141,3 @@ func (s *SymbolsStore) GetLineBySymbolIndex(idx int) (ln int, symbols []Symbol, 
 func (s *SymbolsStore) LineIndex() []int {
 	return s.linesIndex
 }
-

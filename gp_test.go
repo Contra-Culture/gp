@@ -68,13 +68,13 @@ var _ = Describe("gp", func() {
 						result, ok, err := pn.Parse(r)
 						Expect(err).NotTo(HaveOccurred())
 						Expect(ok).To(BeTrue())
-						Expect(result).To(Equal(&gp.ResultNode{
+						Expect(result).To(Equal(&gp.RecSeq{
 							Lines:    []int{1, 1},
 							PosStart: 1,
 							PosEnd:   4,
 							Token:    "",
 							Literal:  "test",
-							Children: []*gp.ResultNode{
+							Children: []*gp.RecSeq{
 								{
 									Lines:    []int{1, 1},
 									PosStart: 1,
@@ -98,7 +98,7 @@ var _ = Describe("gp", func() {
 						result, ok, err := pn.Parse(r)
 						Expect(err).NotTo(HaveOccurred())
 						Expect(ok).To(BeTrue())
-						Expect(result).To(Equal(&gp.ResultNode{
+						Expect(result).To(Equal(&gp.RecSeq{
 							Lines:    nil,
 							PosStart: 0,
 							PosEnd:   0,
@@ -180,7 +180,7 @@ var _ = Describe("gp", func() {
 						Expect(result.Literal).To(Equal("func myFunc() { ignore }"))
 						Expect(result.Token).To(Equal("expression"))
 						Expect(result.Children).To(HaveLen(11))
-						Expect(result.Children[0]).To(Equal(&gp.ResultNode{
+						Expect(result.Children[0]).To(Equal(&gp.RecSeq{
 							Lines:    []int{1, 1},
 							PosStart: 1,
 							PosEnd:   4,
@@ -188,7 +188,7 @@ var _ = Describe("gp", func() {
 							Literal:  "func",
 							Children: nil,
 						}))
-						Expect(result.Children[1]).To(Equal(&gp.ResultNode{
+						Expect(result.Children[1]).To(Equal(&gp.RecSeq{
 							Lines:    []int{1, 1},
 							PosStart: 5,
 							PosEnd:   5,
@@ -196,7 +196,7 @@ var _ = Describe("gp", func() {
 							Literal:  " ",
 							Children: nil,
 						}))
-						Expect(result.Children[2]).To(Equal(&gp.ResultNode{
+						Expect(result.Children[2]).To(Equal(&gp.RecSeq{
 							Lines:    []int{1, 1},
 							PosStart: 6,
 							PosEnd:   11,
@@ -204,7 +204,7 @@ var _ = Describe("gp", func() {
 							Literal:  "myFunc",
 							Children: nil,
 						}))
-						Expect(result.Children[3]).To(Equal(&gp.ResultNode{
+						Expect(result.Children[3]).To(Equal(&gp.RecSeq{
 							Lines:    []int{1, 1},
 							PosStart: 12,
 							PosEnd:   12,
@@ -212,7 +212,7 @@ var _ = Describe("gp", func() {
 							Literal:  "(",
 							Children: nil,
 						}))
-						Expect(result.Children[4]).To(Equal(&gp.ResultNode{
+						Expect(result.Children[4]).To(Equal(&gp.RecSeq{
 							Lines:    []int{1, 1},
 							PosStart: 13,
 							PosEnd:   13,
@@ -220,7 +220,7 @@ var _ = Describe("gp", func() {
 							Literal:  ")",
 							Children: nil,
 						}))
-						Expect(result.Children[5]).To(Equal(&gp.ResultNode{
+						Expect(result.Children[5]).To(Equal(&gp.RecSeq{
 							Lines:    []int{1, 1},
 							PosStart: 14,
 							PosEnd:   14,
@@ -228,7 +228,7 @@ var _ = Describe("gp", func() {
 							Literal:  " ",
 							Children: nil,
 						}))
-						Expect(result.Children[6]).To(Equal(&gp.ResultNode{
+						Expect(result.Children[6]).To(Equal(&gp.RecSeq{
 							Lines:    []int{1, 1},
 							PosStart: 15,
 							PosEnd:   15,
@@ -236,7 +236,7 @@ var _ = Describe("gp", func() {
 							Literal:  "{",
 							Children: nil,
 						}))
-						Expect(result.Children[7]).To(Equal(&gp.ResultNode{
+						Expect(result.Children[7]).To(Equal(&gp.RecSeq{
 							Lines:    []int{1, 1},
 							PosStart: 16,
 							PosEnd:   16,
@@ -244,7 +244,7 @@ var _ = Describe("gp", func() {
 							Literal:  " ",
 							Children: nil,
 						}))
-						Expect(result.Children[8]).To(Equal(&gp.ResultNode{
+						Expect(result.Children[8]).To(Equal(&gp.RecSeq{
 							Lines:    []int{1, 1},
 							PosStart: 17,
 							PosEnd:   22,
@@ -252,7 +252,7 @@ var _ = Describe("gp", func() {
 							Literal:  "ignore",
 							Children: nil,
 						}))
-						Expect(result.Children[9]).To(Equal(&gp.ResultNode{
+						Expect(result.Children[9]).To(Equal(&gp.RecSeq{
 							Lines:    []int{1, 1},
 							PosStart: 23,
 							PosEnd:   23,
@@ -260,7 +260,7 @@ var _ = Describe("gp", func() {
 							Literal:  " ",
 							Children: nil,
 						}))
-						Expect(result.Children[10]).To(Equal(&gp.ResultNode{
+						Expect(result.Children[10]).To(Equal(&gp.RecSeq{
 							Lines:    []int{1, 1},
 							PosStart: 24,
 							PosEnd:   24,
@@ -295,13 +295,13 @@ var _ = Describe("gp", func() {
 						Expect(result.Token).To(Equal(""))
 						Expect(result.Literal).To(Equal("func func func "))
 						Expect(result.Children).To(HaveLen(3))
-						Expect(result.Children[0]).To(Equal(&gp.ResultNode{
+						Expect(result.Children[0]).To(Equal(&gp.RecSeq{
 							Lines:    []int{1, 1},
 							PosStart: 1,
 							PosEnd:   5,
 							Token:    "expression",
 							Literal:  "func ",
-							Children: []*gp.ResultNode{
+							Children: []*gp.RecSeq{
 								{
 									Lines:    []int{1, 1},
 									PosStart: 1,
@@ -320,13 +320,13 @@ var _ = Describe("gp", func() {
 								},
 							},
 						}))
-						Expect(result.Children[1]).To(Equal(&gp.ResultNode{
+						Expect(result.Children[1]).To(Equal(&gp.RecSeq{
 							Lines:    []int{1, 1},
 							PosStart: 6,
 							PosEnd:   10,
 							Token:    "expression",
 							Literal:  "func ",
-							Children: []*gp.ResultNode{
+							Children: []*gp.RecSeq{
 								{
 									Lines:    []int{1, 1},
 									PosStart: 6,
@@ -345,13 +345,13 @@ var _ = Describe("gp", func() {
 								},
 							},
 						}))
-						Expect(result.Children[2]).To(Equal(&gp.ResultNode{
+						Expect(result.Children[2]).To(Equal(&gp.RecSeq{
 							Lines:    []int{1, 1},
 							PosStart: 11,
 							PosEnd:   15,
 							Token:    "expression",
 							Literal:  "func ",
-							Children: []*gp.ResultNode{
+							Children: []*gp.RecSeq{
 								{
 									Lines:    []int{1, 1},
 									PosStart: 11,
@@ -397,7 +397,7 @@ var _ = Describe("gp", func() {
 						Expect(result.PosEnd).To(Equal(4))
 						Expect(result.Token).To(Equal(""))
 						Expect(result.Children).To(HaveLen(1))
-						Expect(result.Children[0]).To(Equal(&gp.ResultNode{
+						Expect(result.Children[0]).To(Equal(&gp.RecSeq{
 							Lines:    []int{1, 1},
 							PosStart: 1,
 							PosEnd:   4,
@@ -418,7 +418,7 @@ var _ = Describe("gp", func() {
 						Expect(result.PosEnd).To(Equal(3))
 						Expect(result.Token).To(Equal(""))
 						Expect(result.Children).To(HaveLen(1))
-						Expect(result.Children[0]).To(Equal(&gp.ResultNode{
+						Expect(result.Children[0]).To(Equal(&gp.RecSeq{
 							Lines:    []int{1, 1},
 							PosStart: 1,
 							PosEnd:   3,
@@ -473,7 +473,7 @@ var _ = Describe("gp", func() {
 						Expect(result.Literal).To(Equal("func myFunc() { ignore }"))
 						Expect(result.Token).To(Equal("expression"))
 						Expect(result.Children).To(HaveLen(11))
-						Expect(result.Children[0]).To(Equal(&gp.ResultNode{
+						Expect(result.Children[0]).To(Equal(&gp.RecSeq{
 							Lines:    []int{1, 1},
 							PosStart: 1,
 							PosEnd:   4,
@@ -481,7 +481,7 @@ var _ = Describe("gp", func() {
 							Literal:  "func",
 							Children: nil,
 						}))
-						Expect(result.Children[1]).To(Equal(&gp.ResultNode{
+						Expect(result.Children[1]).To(Equal(&gp.RecSeq{
 							Lines:    []int{1, 1},
 							PosStart: 5,
 							PosEnd:   5,
@@ -489,13 +489,13 @@ var _ = Describe("gp", func() {
 							Literal:  " ",
 							Children: nil,
 						}))
-						Expect(result.Children[2]).To(Equal(&gp.ResultNode{
+						Expect(result.Children[2]).To(Equal(&gp.RecSeq{
 							Lines:    []int{1, 1},
 							PosStart: 6,
 							PosEnd:   11,
 							Token:    "",
 							Literal:  "myFunc",
-							Children: []*gp.ResultNode{
+							Children: []*gp.RecSeq{
 								{
 									Lines:    []int{1, 1},
 									PosStart: 6,
@@ -506,7 +506,7 @@ var _ = Describe("gp", func() {
 								},
 							},
 						}))
-						Expect(result.Children[3]).To(Equal(&gp.ResultNode{
+						Expect(result.Children[3]).To(Equal(&gp.RecSeq{
 							Lines:    []int{1, 1},
 							PosStart: 12,
 							PosEnd:   12,
@@ -514,7 +514,7 @@ var _ = Describe("gp", func() {
 							Literal:  "(",
 							Children: nil,
 						}))
-						Expect(result.Children[4]).To(Equal(&gp.ResultNode{
+						Expect(result.Children[4]).To(Equal(&gp.RecSeq{
 							Lines:    []int{1, 1},
 							PosStart: 13,
 							PosEnd:   13,
@@ -522,7 +522,7 @@ var _ = Describe("gp", func() {
 							Literal:  ")",
 							Children: nil,
 						}))
-						Expect(result.Children[5]).To(Equal(&gp.ResultNode{
+						Expect(result.Children[5]).To(Equal(&gp.RecSeq{
 							Lines:    []int{1, 1},
 							PosStart: 14,
 							PosEnd:   14,
@@ -530,7 +530,7 @@ var _ = Describe("gp", func() {
 							Literal:  " ",
 							Children: nil,
 						}))
-						Expect(result.Children[6]).To(Equal(&gp.ResultNode{
+						Expect(result.Children[6]).To(Equal(&gp.RecSeq{
 							Lines:    []int{1, 1},
 							PosStart: 15,
 							PosEnd:   15,
@@ -538,7 +538,7 @@ var _ = Describe("gp", func() {
 							Literal:  "{",
 							Children: nil,
 						}))
-						Expect(result.Children[7]).To(Equal(&gp.ResultNode{
+						Expect(result.Children[7]).To(Equal(&gp.RecSeq{
 							Lines:    []int{1, 1},
 							PosStart: 16,
 							PosEnd:   16,
@@ -546,13 +546,13 @@ var _ = Describe("gp", func() {
 							Literal:  " ",
 							Children: nil,
 						}))
-						Expect(result.Children[8]).To(Equal(&gp.ResultNode{
+						Expect(result.Children[8]).To(Equal(&gp.RecSeq{
 							Lines:    []int{1, 1},
 							PosStart: 17,
 							PosEnd:   22,
 							Token:    "",
 							Literal:  "ignore",
-							Children: []*gp.ResultNode{
+							Children: []*gp.RecSeq{
 								{
 									Lines:    []int{1, 1},
 									PosStart: 17,
@@ -563,7 +563,7 @@ var _ = Describe("gp", func() {
 								},
 							},
 						}))
-						Expect(result.Children[9]).To(Equal(&gp.ResultNode{
+						Expect(result.Children[9]).To(Equal(&gp.RecSeq{
 							Lines:    []int{1, 1},
 							PosStart: 23,
 							PosEnd:   23,
@@ -571,7 +571,7 @@ var _ = Describe("gp", func() {
 							Literal:  " ",
 							Children: nil,
 						}))
-						Expect(result.Children[10]).To(Equal(&gp.ResultNode{
+						Expect(result.Children[10]).To(Equal(&gp.RecSeq{
 							Lines:    []int{1, 1},
 							PosStart: 24,
 							PosEnd:   24,
@@ -593,7 +593,7 @@ var _ = Describe("gp", func() {
 						Expect(result.Literal).To(Equal("func () { ignore }"))
 						Expect(result.Token).To(Equal("expression"))
 						Expect(result.Children).To(HaveLen(11))
-						Expect(result.Children[0]).To(Equal(&gp.ResultNode{
+						Expect(result.Children[0]).To(Equal(&gp.RecSeq{
 							Lines:    []int{1, 1},
 							PosStart: 1,
 							PosEnd:   4,
@@ -601,7 +601,7 @@ var _ = Describe("gp", func() {
 							Literal:  "func",
 							Children: nil,
 						}))
-						Expect(result.Children[1]).To(Equal(&gp.ResultNode{
+						Expect(result.Children[1]).To(Equal(&gp.RecSeq{
 							Lines:    []int{1, 1},
 							PosStart: 5,
 							PosEnd:   5,
@@ -609,7 +609,7 @@ var _ = Describe("gp", func() {
 							Literal:  " ",
 							Children: nil,
 						}))
-						Expect(result.Children[2]).To(Equal(&gp.ResultNode{
+						Expect(result.Children[2]).To(Equal(&gp.RecSeq{
 							Lines:    nil,
 							PosStart: 0,
 							PosEnd:   0,
@@ -617,7 +617,7 @@ var _ = Describe("gp", func() {
 							Literal:  "",
 							Children: nil,
 						}))
-						Expect(result.Children[3]).To(Equal(&gp.ResultNode{
+						Expect(result.Children[3]).To(Equal(&gp.RecSeq{
 							Lines:    []int{1, 1},
 							PosStart: 6,
 							PosEnd:   6,
@@ -625,7 +625,7 @@ var _ = Describe("gp", func() {
 							Literal:  "(",
 							Children: nil,
 						}))
-						Expect(result.Children[4]).To(Equal(&gp.ResultNode{
+						Expect(result.Children[4]).To(Equal(&gp.RecSeq{
 							Lines:    []int{1, 1},
 							PosStart: 7,
 							PosEnd:   7,
@@ -633,7 +633,7 @@ var _ = Describe("gp", func() {
 							Literal:  ")",
 							Children: nil,
 						}))
-						Expect(result.Children[5]).To(Equal(&gp.ResultNode{
+						Expect(result.Children[5]).To(Equal(&gp.RecSeq{
 							Lines:    []int{1, 1},
 							PosStart: 8,
 							PosEnd:   8,
@@ -641,7 +641,7 @@ var _ = Describe("gp", func() {
 							Literal:  " ",
 							Children: nil,
 						}))
-						Expect(result.Children[6]).To(Equal(&gp.ResultNode{
+						Expect(result.Children[6]).To(Equal(&gp.RecSeq{
 							Lines:    []int{1, 1},
 							PosStart: 9,
 							PosEnd:   9,
@@ -649,7 +649,7 @@ var _ = Describe("gp", func() {
 							Literal:  "{",
 							Children: nil,
 						}))
-						Expect(result.Children[7]).To(Equal(&gp.ResultNode{
+						Expect(result.Children[7]).To(Equal(&gp.RecSeq{
 							Lines:    []int{1, 1},
 							PosStart: 10,
 							PosEnd:   10,
@@ -657,13 +657,13 @@ var _ = Describe("gp", func() {
 							Literal:  " ",
 							Children: nil,
 						}))
-						Expect(result.Children[8]).To(Equal(&gp.ResultNode{
+						Expect(result.Children[8]).To(Equal(&gp.RecSeq{
 							Lines:    []int{1, 1},
 							PosStart: 11,
 							PosEnd:   16,
 							Token:    "",
 							Literal:  "ignore",
-							Children: []*gp.ResultNode{
+							Children: []*gp.RecSeq{
 								{
 									Lines:    []int{1, 1},
 									PosStart: 11,
@@ -674,7 +674,7 @@ var _ = Describe("gp", func() {
 								},
 							},
 						}))
-						Expect(result.Children[9]).To(Equal(&gp.ResultNode{
+						Expect(result.Children[9]).To(Equal(&gp.RecSeq{
 							Lines:    []int{1, 1},
 							PosStart: 17,
 							PosEnd:   17,
@@ -682,7 +682,7 @@ var _ = Describe("gp", func() {
 							Literal:  " ",
 							Children: nil,
 						}))
-						Expect(result.Children[10]).To(Equal(&gp.ResultNode{
+						Expect(result.Children[10]).To(Equal(&gp.RecSeq{
 							Lines:    []int{1, 1},
 							PosStart: 18,
 							PosEnd:   18,
@@ -695,6 +695,23 @@ var _ = Describe("gp", func() {
 				Context("when not matches", func() {
 					It("returns not ok", func() {
 
+					})
+				})
+			})
+			Context("when `not` node", func() {
+				Context("when matches", func() {
+					It("returns result and ok", func() {
+
+					})
+				})
+				Context("when not matches", func() {
+					It("returns not ok", func() {
+						// _quote := gp.New("_quote", gp.ExactTokenParser("quote", "\""))
+						// quote := gp.Seq("quote", gp.Not("not escaped", gp.New("escape", gp.ExactTokenParser("escape", "\\"))), _quote)
+						// anyParser, err := gp.PatternTokenParser("any", ".+")
+						// Expect(err).NotTo(HaveOccurred())
+						// _anySeq := gp.New("any sequence", anyParser) // todo: any parser node
+						// content := gp.Seq("string content", gp.Not("not escaped quote", quote))
 					})
 				})
 			})
