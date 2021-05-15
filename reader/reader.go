@@ -1,26 +1,24 @@
 package reader
 
 import (
-	"fmt"
-
 	symbolsStore "github.com/Contra-Culture/gp/store"
 )
 
-type BaseSymbolReader struct {
+type Reader struct {
 	beginIdx int
 	cursor   int
 	store    *symbolsStore.SymbolsStore
-	parent   *BaseSymbolReader
+	parent   *Reader
 }
 
-func New(store *symbolsStore.SymbolsStore, beginIdx int) *BaseSymbolReader {
-	return &BaseSymbolReader{
+func New(store *symbolsStore.SymbolsStore, beginIdx int) *Reader {
+	return &Reader{
 		beginIdx: beginIdx,
 		cursor:   beginIdx,
 		store:    store,
 	}
 }
-func (sr *BaseSymbolReader) ReadSymbol() (s symbolsStore.Symbol, err error) {
+func (sr *Reader) ReadSymbol() (s symbolsStore.Symbol, err error) {
 	s, err = sr.store.GetSymbol(sr.cursor)
 	if err != nil {
 		return
@@ -28,30 +26,28 @@ func (sr *BaseSymbolReader) ReadSymbol() (s symbolsStore.Symbol, err error) {
 	sr.cursor++
 	return
 }
-func (sr *BaseSymbolReader) Frame() []symbolsStore.Symbol {
+func (sr *Reader) Frame() []symbolsStore.Symbol {
 	symbols, _ := sr.store.GetRange(sr.beginIdx, sr.cursor-1)
 	return symbols
 }
-func (sr *BaseSymbolReader) Continuation() *BaseSymbolReader {
-	return &BaseSymbolReader{
+func (sr *Reader) Continuation() *Reader {
+	return &Reader{
 		store:    sr.store,
 		beginIdx: sr.cursor,
 		cursor:   sr.cursor,
 		parent:   sr,
 	}
 }
-func (sr *BaseSymbolReader) ReadRune() (r rune, size int, err error) {
+func (sr *Reader) ReadRune() (r rune, size int, err error) {
 	var s symbolsStore.Symbol
 	s, err = sr.ReadSymbol()
 	if err != nil {
-		fmt.Printf("\n\t\terr: %s", err.Error())
 		return
 	}
 	r = s.Rune
 	size = s.Size
-	fmt.Printf("\n\t\treader.ReadRune() symbol: `%s` -> %#v\n", string(s.Rune), s)
 	return
 }
-func (sr *BaseSymbolReader) CommitToParent() {
+func (sr *Reader) CommitToParent() {
 	sr.parent.cursor = sr.cursor
 }

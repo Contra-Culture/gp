@@ -18,7 +18,7 @@ var _ = Describe("reader", func() {
 		err          error
 		content      *bufio.Reader
 		symbolsStore *store.SymbolsStore
-		reader       *BaseSymbolReader
+		reader       *Reader
 	)
 	BeforeEach(func() {
 		file, err = os.Open("../test/test")
