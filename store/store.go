@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"io"
 	"strings"
+
+	"github.com/Contra-Culture/gp/lsrange"
 )
 
 type (
@@ -20,7 +22,7 @@ type (
 	}
 )
 
-const NewLine = '\n'
+const newLINE = '\n'
 
 func (ss Symbols) String() string {
 	var sb strings.Builder
@@ -65,7 +67,7 @@ func New(source io.RuneReader) (store *SymbolsStore, err error) {
 			Position: position,
 		}
 		store.symbolsIndex = append(store.symbolsIndex, symbol)
-		if r == NewLine {
+		if r == newLINE {
 			line++
 			store.linesIndex = append(store.linesIndex, i+1)
 			position = 1
@@ -137,7 +139,21 @@ func (s *SymbolsStore) GetLineBySymbolIndex(idx int) (ln int, symbols []Symbol, 
 	ln = symbol.Line
 	return
 }
-
 func (s *SymbolsStore) LineIndex() []int {
 	return s.linesIndex
+}
+func (ss Symbols) First() Symbol {
+	return ss[0]
+}
+func (ss Symbols) Last() Symbol {
+	return ss[len(ss)-1]
+}
+func (ss Symbols) Symbols() Symbols {
+	return ss
+}
+func (ss Symbols) Lines() lsrange.LinesRange {
+	return lsrange.LinesRange{
+		First: ss.First().Line,
+		Last:  ss.Last().Line,
+	}
 }

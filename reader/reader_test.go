@@ -227,9 +227,37 @@ var _ = Describe("reader", func() {
 			Expect(s.Position).To(Equal(0))
 		})
 	})
+	Describe(".UnreadSymbol()", func() {
+		Context("when in an uncommited range", func() {
+			It("unreads symbol", func() {
+				ucr := reader.UncommittedRead()
+				Expect(ucr).To(HaveLen(0))
+				s, err := reader.ReadSymbol()
+				Expect(err).NotTo(HaveOccurred())
+				Expect(s.Rune).To(Equal('s'))
+				Expect(s.Line).To(Equal(1))
+				Expect(s.Position).To(Equal(1))
+				ucr = reader.UncommittedRead()
+				Expect(ucr).To(HaveLen(1))
+				err = reader.UnreadSymbol()
+				Expect(err).NotTo(HaveOccurred())
+				ucr = reader.UncommittedRead()
+				Expect(ucr).To(HaveLen(0))
+			})
+		})
+		Context("when out of an uncommited range", func() {
+			It("returns error", func() {
+				ucr := reader.UncommittedRead()
+				Expect(ucr).To(HaveLen(0))
+				err := reader.UnreadSymbol()
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(Equal("you're trying to unread out of uncommited range"))
+			})
+		})
+	})
 	Describe(".Continuation()", func() {
 		It("returns fork", func() {
-			continuation := reader.Continuation()
+			continuation := reader.Continuation(0)
 			s, err := reader.ReadSymbol()
 			Expect(err).NotTo(HaveOccurred())
 			Expect(s.Rune).To(Equal('s'))
@@ -246,7 +274,7 @@ var _ = Describe("reader", func() {
 				Line:     1,
 				Position: 2,
 			}))
-			continuation2 := continuation.Continuation()
+			continuation2 := continuation.Continuation(0)
 			sff, err := continuation2.ReadSymbol()
 			Expect(err).NotTo(HaveOccurred())
 			Expect(sff).To(Equal(store.Symbol{
@@ -257,9 +285,9 @@ var _ = Describe("reader", func() {
 			}))
 		})
 	})
-	Describe(".Frame()", func() {
-		It("returns reed symbols", func() {
-			frame := reader.Frame()
+	Describe(".UncommittedRead()", func() {
+		It("returns symbols that were read but not yet committed", func() {
+			frame := reader.UncommittedRead()
 			Expect(frame).To(HaveLen(0))
 			s, err := reader.ReadSymbol()
 			Expect(err).NotTo(HaveOccurred())
@@ -270,7 +298,7 @@ var _ = Describe("reader", func() {
 				Position: 1,
 			}
 			Expect(s).To(Equal(expected1))
-			frame = reader.Frame()
+			frame = reader.UncommittedRead()
 			Expect(frame).To(HaveLen(1))
 			Expect(frame[0]).To(Equal(expected1))
 			s, err = reader.ReadSymbol()
@@ -282,7 +310,7 @@ var _ = Describe("reader", func() {
 				Position: 2,
 			}
 			Expect(s).To(Equal(expected2))
-			frame = reader.Frame()
+			frame = reader.UncommittedRead()
 			Expect(frame).To(HaveLen(2))
 			Expect(frame[0]).To(Equal(expected1))
 			Expect(frame[1]).To(Equal(expected2))
@@ -290,7 +318,7 @@ var _ = Describe("reader", func() {
 			Expect(err).NotTo(HaveOccurred())
 			Expect(size).To(Equal(1))
 			Expect(r).To(Equal('m'))
-			frame = reader.Frame()
+			frame = reader.UncommittedRead()
 			Expect(frame).To(HaveLen(3))
 			Expect(frame[0]).To(Equal(expected1))
 			Expect(frame[1]).To(Equal(expected2))
@@ -357,8 +385,13 @@ var _ = Describe("reader", func() {
 			Expect(err).NotTo(HaveOccurred())
 			Expect(size).To(Equal(1))
 			Expect(r).To(Equal('\n'))
-			frame := reader.Frame()
+			frame := reader.UncommittedRead()
 			Expect(frame).To(HaveLen(13))
+		})
+	})
+	Describe(".Frame()", func() {
+		It("returns frame", func() {
+
 		})
 	})
 })
