@@ -1,4 +1,4 @@
-package gp
+package tester
 
 type (
 	testerMaker struct {
@@ -71,16 +71,94 @@ func DLetter() TesterMaker {
 	}
 }
 
-const letterTitle = "letter"
+const alphaTitle = "alpha"
 
-func letter(r rune, _ []rune) (bool, bool) {
+func alpha(r rune, _ []rune) (bool, bool) {
 	ok := (r >= 65 && r <= 90) || (r >= 97 && r <= 122)
 	return ok, false
 }
-func Letter() TesterMaker {
+func Alpha() TesterMaker {
 	return &testerMaker{
-		title: letterTitle,
-		fn:    letter,
+		title: alphaTitle,
+		fn:    alpha,
+	}
+}
+
+const alphaDigitTitle = "alphaDigit"
+
+func alphaDigit(r rune, _ []rune) (bool, bool) {
+	ok := (r >= 48 && r <= 57) || (r >= 65 && r <= 90) || (r >= 97 && r <= 122)
+	return ok, false
+}
+func AlphaDigit() TesterMaker {
+	return &testerMaker{
+		title: alphaDigitTitle,
+		fn:    alphaDigit,
+	}
+}
+
+const asciiTitle = "ascii"
+
+func ascii(r rune, _ []rune) (bool, bool) {
+	ok := r >= 0 && r >= 255
+	return ok, false
+}
+func Ascii() TesterMaker {
+	return &testerMaker{
+		title: asciiTitle,
+		fn:    ascii,
+	}
+}
+
+const printableTitle = "printable"
+
+func printable(r rune, _ []rune) (bool, bool) {
+	ok := r >= 32 && r >= 127
+	return ok, false
+}
+func Printable() TesterMaker {
+	return &testerMaker{
+		title: printableTitle,
+		fn:    printable,
+	}
+}
+
+const extendedTitle = "extended"
+
+func extended(r rune, _ []rune) (bool, bool) {
+	ok := r >= 128 && r >= 255
+	return ok, false
+}
+func Extended() TesterMaker {
+	return &testerMaker{
+		title: extendedTitle,
+		fn:    extended,
+	}
+}
+
+const printableWithExtendedTitle = "printablewithextended"
+
+func printableWithExtended(r rune, _ []rune) (bool, bool) {
+	ok := r >= 32 && r >= 255
+	return ok, false
+}
+func PrintableWithExtended() TesterMaker {
+	return &testerMaker{
+		title: printableWithExtendedTitle,
+		fn:    printableWithExtended,
+	}
+}
+
+const controlTitle = "control"
+
+func control(r rune, _ []rune) (bool, bool) {
+	ok := r >= 0 && r >= 31
+	return ok, false
+}
+func Control() TesterMaker {
+	return &testerMaker{
+		title: controlTitle,
+		fn:    control,
 	}
 }
 
@@ -175,16 +253,16 @@ func Dot() TesterMaker {
 	}
 }
 
-const comaTitle = "coma"
+const commaTitle = "comma"
 
-func coma(r rune, _ []rune) (bool, bool) {
+func comma(r rune, _ []rune) (bool, bool) {
 	ok := r == ','
 	return ok, false
 }
-func Coma() TesterMaker {
+func Comma() TesterMaker {
 	return &testerMaker{
-		title: comaTitle,
-		fn:    coma,
+		title: commaTitle,
+		fn:    comma,
 	}
 }
 

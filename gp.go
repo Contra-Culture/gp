@@ -5,6 +5,7 @@ import (
 
 	"github.com/Contra-Culture/gp/reader"
 	"github.com/Contra-Culture/gp/store"
+	"github.com/Contra-Culture/gp/tester"
 )
 
 type (
@@ -56,7 +57,7 @@ type (
 	}
 	continuousParser struct {
 		token        Token
-		testerMakers []TesterMaker
+		testerMakers []tester.TesterMaker
 	}
 	Parsed struct {
 		Frame    Frame
@@ -139,7 +140,7 @@ func (p *exactParser) Parse(rdr *reader.Reader) *Frame {
 		},
 	}
 }
-func ContinuousParserMaker(token Token, testerMakers ...TesterMaker) (maker ParserMaker) {
+func ContinuousParserMaker(token Token, testerMakers ...tester.TesterMaker) (maker ParserMaker) {
 	maker = func() (parser Parser) {
 		parser = &continuousParser{
 			token,
@@ -150,7 +151,7 @@ func ContinuousParserMaker(token Token, testerMakers ...TesterMaker) (maker Pars
 	return
 }
 func (p *continuousParser) Parse(rdr *reader.Reader) *Frame {
-	var tester Tester
+	var tester tester.Tester
 	var s store.Symbol
 	var err error
 	var smap []sequence

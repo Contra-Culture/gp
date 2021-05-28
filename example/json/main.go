@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/Contra-Culture/gp"
+	t "github.com/Contra-Culture/gp/tester"
 )
 
 func main() {
@@ -12,6 +13,6 @@ func main() {
 		gp.BasicNode("true", gp.ExactParserMaker(literal, "true")),
 		gp.BasicNode("false", gp.ExactParserMaker(literal, "false")),
 	)
-	stringNode := gp.SeqNode("string")
-	gp.BeginNode(gp.OrNode("value", nullNode, numberNode, boolNode))
+	stringNode := gp.BasicNode("string", gp.ContinuousParserMaker(literal, t.DoubleQuote(), t.Any(), t.DoubleQuote()))
+	gp.BeginNode(gp.OrNode("value", nullNode, numberNode, boolNode, stringNode))
 }
