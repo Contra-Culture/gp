@@ -1,4 +1,4 @@
-package reader_test
+package ast_test
 
 import (
 	"testing"
@@ -7,7 +7,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func TestReader(t *testing.T) {
+func TestAst(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Reader Suite")
+	RunSpecs(t, "Ast Suite")
 }
