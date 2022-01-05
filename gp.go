@@ -1,6 +1,7 @@
 package gp
 
 import (
+	"errors"
 	"fmt"
 	"io"
 )
@@ -12,29 +13,22 @@ type (
 		children []*ASTNode
 	}
 	Parser interface {
-		Name() string
-		Kind() string
 		Parse(io.RuneScanner) (*ASTNode, error)
 	}
 	symbolParser struct {
-		r    rune
-		name string
+		r rune
 	}
 	stringParser struct {
-		str  string
-		name string
+		str string
 	}
 	sequenceParser struct {
 		children []Parser
-		name     string
 	}
 	repeatParser struct {
 		repeatable Parser
-		name       string
 	}
 	variantParser struct {
 		variants []Parser
-		name     string
 	}
 	optionalParser struct {
 		option Parser
@@ -44,7 +38,6 @@ type (
 	highAlphaParser     struct{}
 	anyOneOfRunesParser struct {
 		runes []rune
-		name  string
 	}
 	runeExceptParser struct {
 		exceptions []rune
@@ -55,12 +48,6 @@ func RuneExcept(rs ...rune) (p Parser) {
 	return runeExceptParser{
 		exceptions: rs,
 	}
-}
-func (p runeExceptParser) Name() string {
-	return ""
-}
-func (p runeExceptParser) Kind() string {
-	return "rune-except"
 }
 func (p runeExceptParser) Parse(rs io.RuneScanner) (n *ASTNode, err error) {
 	r, _, err := rs.ReadRune()
@@ -80,19 +67,13 @@ func (p runeExceptParser) Parse(rs io.RuneScanner) (n *ASTNode, err error) {
 	return
 }
 func Alpha() (p Parser) {
-	return Variant("alpha", HighAlpha(), LowAlpha())
+	return Variant(HighAlpha(), LowAlpha())
 }
 func AlphaDigit() (p Parser) {
-	return Variant("alphaDigit", Alpha(), Digit())
+	return Variant(Alpha(), Digit())
 }
 func HighAlpha() (p Parser) {
 	return highAlphaParser{}
-}
-func (_ highAlphaParser) Name() string {
-	return "highAlpha"
-}
-func (_ highAlphaParser) Kind() string {
-	return "variant"
 }
 func (p highAlphaParser) Parse(rs io.RuneScanner) (n *ASTNode, err error) {
 	r, _, err := rs.ReadRune()
@@ -114,15 +95,8 @@ func (p highAlphaParser) Parse(rs io.RuneScanner) (n *ASTNode, err error) {
 	}
 	return
 }
-
 func LowAlpha() (p Parser) {
 	return lowAlphaParser{}
-}
-func (_ lowAlphaParser) Name() string {
-	return "lowAlpha"
-}
-func (_ lowAlphaParser) Kind() string {
-	return "variant"
 }
 func (p lowAlphaParser) Parse(rs io.RuneScanner) (n *ASTNode, err error) {
 	r, _, err := rs.ReadRune()
@@ -147,12 +121,6 @@ func (p lowAlphaParser) Parse(rs io.RuneScanner) (n *ASTNode, err error) {
 func Digit() (p Parser) {
 	return digitParser{}
 }
-func (_ digitParser) Name() string {
-	return "digit"
-}
-func (_ digitParser) Kind() string {
-	return "variant"
-}
 func (p digitParser) Parse(rs io.RuneScanner) (n *ASTNode, err error) {
 	r, _, err := rs.ReadRune()
 	if err != nil {
@@ -176,27 +144,14 @@ func (p digitParser) Parse(rs io.RuneScanner) (n *ASTNode, err error) {
 func (n *ASTNode) Parsed() []rune {
 	return n.parsed
 }
-func (n *ASTNode) ParserName() string {
-	return n.parser.Name()
-}
-func (n *ASTNode) ParserKind() string {
-	return n.parser.Kind()
-}
 func (n *ASTNode) Children() []*ASTNode {
 	return n.children
 }
-func Symbol(n string, r rune) (p Parser) {
+func Symbol(r rune) (p Parser) {
 	p = &symbolParser{
-		r:    r,
-		name: n,
+		r: r,
 	}
 	return
-}
-func (p *symbolParser) Name() string {
-	return p.name
-}
-func (p *symbolParser) Kind() string {
-	return "symbol"
 }
 func (p *symbolParser) Parse(rr io.RuneScanner) (node *ASTNode, err error) {
 	expected := rune(p.r)
@@ -218,18 +173,11 @@ func (p *symbolParser) Parse(rr io.RuneScanner) (node *ASTNode, err error) {
 	}
 	return
 }
-func Seq(n string, ps ...Parser) (p Parser) {
+func Seq(ps ...Parser) (p Parser) {
 	p = &sequenceParser{
 		children: ps,
-		name:     n,
 	}
 	return
-}
-func (p *sequenceParser) Name() string {
-	return p.name
-}
-func (p *sequenceParser) Kind() string {
-	return "sequence"
 }
 func (p *sequenceParser) Parse(rs io.RuneScanner) (node *ASTNode, err error) {
 	node = &ASTNode{
@@ -245,7 +193,7 @@ func (p *sequenceParser) Parse(rs io.RuneScanner) (node *ASTNode, err error) {
 					panic(err) // should not occur
 				}
 			}
-			err = fmt.Errorf("children parser `%s` failed: %w", childParser.Name(), err)
+			err = fmt.Errorf("parser failed: %w", err)
 			return
 		}
 		node.parsed = append(node.parsed, childNode.parsed...)
@@ -253,17 +201,10 @@ func (p *sequenceParser) Parse(rs io.RuneScanner) (node *ASTNode, err error) {
 	}
 	return
 }
-func AnyOneOfRunes(n string, rs ...rune) (p Parser) {
+func AnyOneOfRunes(rs ...rune) (p Parser) {
 	return &anyOneOfRunesParser{
 		runes: rs,
-		name:  n,
 	}
-}
-func (p *anyOneOfRunesParser) Name() string {
-	return p.name
-}
-func (p *anyOneOfRunesParser) Kind() string {
-	return "variant"
 }
 func (p *anyOneOfRunesParser) Parse(rs io.RuneScanner) (n *ASTNode, err error) {
 	n = &ASTNode{
@@ -290,16 +231,9 @@ func (p *anyOneOfRunesParser) Parse(rs io.RuneScanner) (n *ASTNode, err error) {
 }
 func String(s string) (p Parser) {
 	p = &stringParser{
-		str:  s,
-		name: fmt.Sprintf("\"%s\"", s),
+		str: s,
 	}
 	return
-}
-func (p *stringParser) Name() string {
-	return p.name
-}
-func (p *stringParser) Kind() string {
-	return "sequence"
 }
 func (p *stringParser) Parse(rr io.RuneScanner) (node *ASTNode, err error) {
 	var r rune
@@ -325,18 +259,11 @@ func (p *stringParser) Parse(rr io.RuneScanner) (node *ASTNode, err error) {
 	}
 	return
 }
-func Repeat(n string, rp Parser) (p Parser) {
+func Repeat(rp Parser) (p Parser) {
 	p = &repeatParser{
 		repeatable: rp,
-		name:       n,
 	}
 	return
-}
-func (p *repeatParser) Name() string {
-	return p.name
-}
-func (p *repeatParser) Kind() string {
-	return "repeat"
 }
 func (p *repeatParser) Parse(rr io.RuneScanner) (node *ASTNode, err error) {
 	var child *ASTNode
@@ -353,18 +280,11 @@ func (p *repeatParser) Parse(rr io.RuneScanner) (node *ASTNode, err error) {
 		node.children = append(node.children, child)
 	}
 }
-func Variant(n string, variants ...Parser) (p Parser) {
+func Variant(variants ...Parser) (p Parser) {
 	p = &variantParser{
 		variants: variants,
-		name:     n,
 	}
 	return
-}
-func (p *variantParser) Name() string {
-	return p.name
-}
-func (p *variantParser) Kind() string {
-	return "variant"
 }
 func (p *variantParser) Parse(rs io.RuneScanner) (node *ASTNode, err error) {
 	node = &ASTNode{
@@ -380,7 +300,7 @@ func (p *variantParser) Parse(rs io.RuneScanner) (node *ASTNode, err error) {
 		node.children = append(node.children, child)
 		return
 	}
-	err = fmt.Errorf("no `%s` variant parsed", p.name)
+	err = errors.New("no variant parsed")
 	return
 }
 func Optional(op Parser) (p Parser) {
@@ -388,12 +308,6 @@ func Optional(op Parser) (p Parser) {
 		option: op,
 	}
 	return
-}
-func (p *optionalParser) Name() string {
-	return fmt.Sprintf("[%s]", p.option.Name())
-}
-func (p *optionalParser) Kind() string {
-	return "optional"
 }
 func (p *optionalParser) Parse(rs io.RuneScanner) (node *ASTNode, err error) {
 	node = &ASTNode{

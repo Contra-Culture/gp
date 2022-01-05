@@ -13,20 +13,16 @@ var _ = Describe("gp", func() {
 	Describe("parsers", func() {
 		Describe("symbol parser", func() {
 			It("parses symbol", func() {
-				s1 := Symbol("opening bracket", '{')
+				s1 := Symbol('{')
 				rs := RuneScanner("{}")
 				n, err := s1.Parse(rs)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(n).NotTo(BeNil())
-				Expect(n.ParserName()).To(Equal("opening bracket"))
-				Expect(n.ParserKind()).To(Equal("symbol"))
 				Expect(n.Parsed()).To(Equal([]rune{'{'}))
-				s2 := Symbol("closing bracket", '}')
+				s2 := Symbol('}')
 				n, err = s2.Parse(rs)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(n).NotTo(BeNil())
-				Expect(n.ParserName()).To(Equal("closing bracket"))
-				Expect(n.ParserKind()).To(Equal("symbol"))
 				Expect(n.Parsed()).To(Equal([]rune{'}'}))
 			})
 		})
@@ -37,44 +33,37 @@ var _ = Describe("gp", func() {
 				n, err := str.Parse(rs)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(n).NotTo(BeNil())
-				Expect(n.ParserName()).To(Equal("\"end\""))
-				Expect(n.ParserKind()).To(Equal("sequence"))
 				Expect(n.Parsed()).To(Equal([]rune{'e', 'n', 'd'}))
 			})
 		})
 		Describe("sequence parser", func() {
 			It("parses sequence", func() {
-				seq := Seq("less than or equal to", Symbol("less than", '<'), Symbol("equal to", '='))
+				seq := Seq(Symbol('<'), Symbol('='))
 				rs := RuneScanner("<=")
 				n, err := seq.Parse(rs)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(n).NotTo(BeNil())
-				Expect(n.ParserName()).To(Equal("less than or equal to"))
-				Expect(n.ParserKind()).To(Equal("sequence"))
 				Expect(n.Parsed()).To(Equal([]rune{'<', '='}))
 			})
 		})
 		Describe("repeat parser", func() {
 			It("parses repeatable stuff", func() {
-				rep := Repeat("many equals", Symbol("equal", '='))
+				rep := Repeat(Symbol('='))
 				rs := RuneScanner("=====")
 				n, err := rep.Parse(rs)
 				Expect(err).NotTo(HaveOccurred())
-				Expect(n).NotTo(BeNil())
-				Expect(n.ParserName()).To(Equal("many equals"))
-				Expect(n.ParserKind()).To(Equal("repeat"))
 				Expect(n.Parsed()).To(Equal([]rune{'=', '=', '=', '=', '='}))
 			})
 		})
 		Describe("variant parser", func() {
 			It("parses variants", func() {
-				vars := Variant("comparison operator",
-					Seq("equality", Symbol("equal", '='), Symbol("equal", '=')),
-					Seq("less than or equal to", Symbol("less than", '<'), Symbol("equal", '=')),
-					Seq("greater than or equal to", Symbol("greater than", '>'), Symbol("equal", '=')),
-					Seq("not equal", Symbol("negation", '!'), Symbol("equal", '=')),
-					Symbol("less than", '<'),
-					Symbol("greater than", '>'),
+				vars := Variant(
+					Seq(Symbol('='), Symbol('=')),
+					Seq(Symbol('<'), Symbol('=')),
+					Seq(Symbol('>'), Symbol('=')),
+					Seq(Symbol('!'), Symbol('=')),
+					Symbol('<'),
+					Symbol('>'),
 				)
 				operators := []string{
 					">",
@@ -89,15 +78,13 @@ var _ = Describe("gp", func() {
 					n, err := vars.Parse(rs)
 					Expect(err).NotTo(HaveOccurred())
 					Expect(n).NotTo(BeNil())
-					Expect(n.ParserName()).To(Equal("comparison operator"))
-					Expect(n.ParserKind()).To(Equal("variant"))
 					Expect(n.Parsed()).To(Equal([]rune(op)))
 				}
 			})
 		})
 		Describe("optional parser", func() {
 			It("parses optional stuff", func() {
-				optional := Optional(Variant("digit sign", Symbol("minus", '-'), Symbol("plus", '+')))
+				optional := Optional(Variant(Symbol('-'), Symbol('+')))
 				tests := map[string][]rune{
 					"-": {'-'},
 					"+": {'+'},
@@ -107,8 +94,6 @@ var _ = Describe("gp", func() {
 					rs := RuneScanner(t)
 					n, err := optional.Parse(rs)
 					Expect(err).NotTo(HaveOccurred())
-					Expect(n.ParserName()).To(Equal("[digit sign]"))
-					Expect(n.ParserKind()).To(Equal("optional"))
 					Expect(n.Parsed()).To(Equal(runes))
 				}
 			})
@@ -133,8 +118,6 @@ var _ = Describe("gp", func() {
 					n, err := sp.Parse(rs)
 					Expect(err).NotTo(HaveOccurred())
 					Expect(n).NotTo(BeNil())
-					Expect(n.ParserName()).To(Equal("digit"))
-					Expect(n.ParserKind()).To(Equal("variant"))
 					Expect(n.Parsed()).To(Equal([]rune(t)))
 				}
 			})
@@ -153,14 +136,12 @@ var _ = Describe("gp", func() {
 					"8",
 					"9",
 				}
-				sp := AnyOneOfRunes("decimals except zero", '0', '1', '2', '3', '4', '5', '6', '7', '8', '9')
+				sp := AnyOneOfRunes('0', '1', '2', '3', '4', '5', '6', '7', '8', '9')
 				for _, t := range tests {
 					rs := RuneScanner(t)
 					n, err := sp.Parse(rs)
 					Expect(err).NotTo(HaveOccurred())
 					Expect(n).NotTo(BeNil())
-					Expect(n.ParserName()).To(Equal("decimals except zero"))
-					Expect(n.ParserKind()).To(Equal("variant"))
 					Expect(n.Parsed()).To(Equal([]rune(t)))
 				}
 			})
@@ -201,8 +182,6 @@ var _ = Describe("gp", func() {
 					n, err := sp.Parse(rs)
 					Expect(err).NotTo(HaveOccurred())
 					Expect(n).NotTo(BeNil())
-					Expect(n.ParserName()).To(Equal("lowAlpha"))
-					Expect(n.ParserKind()).To(Equal("variant"))
 					Expect(n.Parsed()).To(Equal([]rune(t)))
 				}
 			})
@@ -243,8 +222,6 @@ var _ = Describe("gp", func() {
 					n, err := sp.Parse(rs)
 					Expect(err).NotTo(HaveOccurred())
 					Expect(n).NotTo(BeNil())
-					Expect(n.ParserName()).To(Equal("highAlpha"))
-					Expect(n.ParserKind()).To(Equal("variant"))
 					Expect(n.Parsed()).To(Equal([]rune(t)))
 				}
 			})
@@ -311,8 +288,6 @@ var _ = Describe("gp", func() {
 					n, err := sp.Parse(rs)
 					Expect(err).NotTo(HaveOccurred())
 					Expect(n).NotTo(BeNil())
-					Expect(n.ParserName()).To(Equal("alpha"))
-					Expect(n.ParserKind()).To(Equal("variant"))
 					Expect(n.Parsed()).To(Equal([]rune(t)))
 				}
 			})
