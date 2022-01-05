@@ -4,9 +4,7 @@ import "github.com/Contra-Culture/gp"
 
 var (
 	pattern = gp.Repeat(
-		"value",
 		gp.Variant(
-			"JSON pattern",
 			JSONString,
 			JSONNumber,
 			JSONArray,
@@ -15,42 +13,34 @@ var (
 			JSONNull,
 		),
 	)
-	hexDigit = gp.AnyOneOfRunes("hex", '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f')
+	hexDigit = gp.AnyOneOfRunes('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f')
 
-	whitespace = gp.Repeat("whitespace", gp.AnyOneOfRunes("single-whitespace", ' ', '\n', '\t'))
+	whitespace = gp.Repeat(gp.AnyOneOfRunes(' ', '\n', '\t'))
 	JSONNull   = gp.String("null")
-	JSONBool   = gp.Variant("bool", gp.String("true"), gp.String("false"))
+	JSONBool   = gp.Variant(gp.String("true"), gp.String("false"))
 	JSONArray  = gp.Seq(
-		"array",
-		gp.Symbol("opening bracket", '['),
+		gp.Symbol('['),
 		whitespace,
 		gp.Optional(
 			gp.Seq(
-				"",
 				JSONValue,
 				gp.Repeat(
-					"",
-					gp.Symbol("", ','),
+					gp.Symbol(','),
 					JSONValue,
 				),
 			),
 		),
-		gp.Symbol("closing bracket", ']'),
+		gp.Symbol(']'),
 	)
 	JSONString = gp.Seq(
-		"string",
-		gp.Symbol("opening quote", '"'),
+		gp.Symbol('"'),
 		gp.Variant(
-			"",
 			gp.Seq(
-				"escape",
-				gp.Symbol("", '\\'),
+				gp.Symbol('\\'),
 				gp.Variant(
-					"",
-					gp.AnyOneOfRunes("", '"', '\\', '/', 'b', 'f', 'n', 'r', 't'),
+					gp.AnyOneOfRunes('"', '\\', '/', 'b', 'f', 'n', 'r', 't'),
 					gp.Seq(
-						"",
-						gp.Symbol("", 'u'),
+						gp.Symbol('u'),
 						hexDigit,
 						hexDigit,
 						hexDigit,
@@ -60,11 +50,10 @@ var (
 			),
 			gp.RuneExcept('"', '\\'),
 		),
-		gp.Symbol("closing quote", '"'),
+		gp.Symbol('"'),
 	)
 	JSONObject = gp.Seq(
-		"string",
-		gp.Symbol("opening bracket", '{'),
+		gp.Symbol('{'),
 		whitespace,
 		gp.Optional(
 			gp.Seq(
@@ -72,27 +61,24 @@ var (
 				whitespace,
 				JSONString,
 				whitespace,
-				gp.Symbol("", ':'),
+				gp.Symbol(':'),
 				JSONValue,
 				gp.Repeat(
-					"",
 					gp.Seq(
-						gp.Symbol("", ','),
+						gp.Symbol(','),
 						JSONString,
 						whitespace,
-						gp.Symbol("", ':'),
+						gp.Symbol(':'),
 						JSONValue,
 					),
 				),
 			),
 		),
-		gp.Symbol("closing bracket", '}'),
+		gp.Symbol('}'),
 	)
 	JSONValue = gp.Seq(
-		"value",
 		whitespace,
 		gp.Variant(
-			"literal",
 			JSONString,
 			JSONNumber,
 			JSONObject,
@@ -102,38 +88,33 @@ var (
 		),
 		whitespace,
 	)
-	numMinusSign = gp.Optional(gp.Symbol("num-sign", '-'))
-	numSign      = gp.Optional(gp.AnyOneOfRunes("num-sign", '+', '-'))
-	zero         = gp.Symbol("digit", '0')
-	nonZeroDigit = gp.AnyOneOfRunes("digit", '1', '2', '3', '4', '5', '6', '7', '8', '9')
-	digit        = gp.AnyOneOfRunes("digit", '0', '1', '2', '3', '4', '5', '6', '7', '8', '9')
+	numMinusSign = gp.Optional(gp.Symbol('-'))
+	numSign      = gp.Optional(gp.AnyOneOfRunes('+', '-'))
+	zero         = gp.Symbol('0')
+	nonZeroDigit = gp.AnyOneOfRunes('1', '2', '3', '4', '5', '6', '7', '8', '9')
+	digit        = gp.AnyOneOfRunes('0', '1', '2', '3', '4', '5', '6', '7', '8', '9')
 	JSONNumber   = gp.Seq(
-		"number",
 		numMinusSign,
 		gp.Variant(
-			"",
 			gp.Seq(
-				"",
 				nonZeroDigit,
-				gp.Repeat("", digit),
+				gp.Repeat(digit),
 			),
 			zero,
 		),
 		gp.Optional(
 			gp.Seq(
-				"",
-				gp.Symbol("dot", '.'),
+				gp.Symbol('.'),
 				digit,
-				gp.Repeat("", digit),
+				gp.Repeat(digit),
 			),
 		),
 		gp.Optional(
 			gp.Seq(
-				"mantissa",
-				gp.AnyOneOfRunes("", 'e', 'E'),
+				gp.AnyOneOfRunes('e', 'E'),
 				numSign,
 				digit,
-				gp.Repeat("", digit),
+				gp.Repeat(digit),
 			),
 		),
 	)
