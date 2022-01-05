@@ -46,8 +46,39 @@ type (
 		runes []rune
 		name  string
 	}
+	runeExceptParser struct {
+		exceptions []rune
+	}
 )
 
+func RuneExcept(rs ...rune) (p Parser) {
+	return runeExceptParser{
+		exceptions: rs,
+	}
+}
+func (p runeExceptParser) Name() string {
+	return ""
+}
+func (p runeExceptParser) Kind() string {
+	return "rune-except"
+}
+func (p runeExceptParser) Parse(rs io.RuneScanner) (n *ASTNode, err error) {
+	r, _, err := rs.ReadRune()
+	if err != nil {
+		panic(err)
+	}
+	for _, notExpected := range p.exceptions {
+		if r == notExpected {
+			err = fmt.Errorf("wrong rune `%#U`", r)
+			return
+		}
+	}
+	n = &ASTNode{
+		parser: p,
+		parsed: []rune{r},
+	}
+	return
+}
 func Alpha() (p Parser) {
 	return Variant("alpha", HighAlpha(), LowAlpha())
 }

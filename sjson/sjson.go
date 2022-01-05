@@ -15,16 +15,51 @@ var (
 			JSONNull,
 		),
 	)
-	JSONNull  = gp.String("null")
-	JSONBool  = gp.Variant("bool", gp.String("true"), gp.String("false"))
-	JSONArray = gp.Seq(
+	hexDigit = gp.AnyOneOfRunes("hex", '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f')
+
+	whitespace = gp.Repeat("whitespace", gp.AnyOneOfRunes("single-whitespace", ' ', '\n', '\t'))
+	JSONNull   = gp.String("null")
+	JSONBool   = gp.Variant("bool", gp.String("true"), gp.String("false"))
+	JSONArray  = gp.Seq(
 		"array",
 		gp.Symbol("opening bracket", '['),
+		whitespace,
+		gp.Optional(
+			gp.Seq(
+				"",
+				JSONValue,
+				gp.Repeat(
+					"",
+					gp.Symbol("",','),
+					JSONValue,
+				),
+			),
+		),
 		gp.Symbol("closing bracket", ']'),
 	)
 	JSONString = gp.Seq(
 		"string",
 		gp.Symbol("opening quote", '"'),
+		gp.Variant(
+			"",
+			gp.Seq(
+				"escape",
+				gp.Symbol("", '\\'),
+				gp.Variant(
+					"",
+					gp.AnyOneOfRunes("", '"', '\\', '/', 'b', 'f', 'n', 'r', 't'),
+					gp.Seq(
+						"",
+						gp.Symbol("", 'u'),
+						hexDigit,
+						hexDigit,
+						hexDigit,
+						hexDigit,
+					),
+				),
+			),
+			gp.RuneExcept('"', '\\'),
+		),
 		gp.Symbol("closing quote", '"'),
 	)
 	JSONObject = gp.Seq(
@@ -32,33 +67,52 @@ var (
 		gp.Symbol("opening bracket", '{'),
 		gp.Symbol("closing bracket", '}'),
 	)
-	JSONNumber = gp.Seq(
-		"number",
-		gp.Optional(gp.Symbol("minus", '-')),
+	JSONValue = gp.Seq(
+		"value",
+		whitespace,
 		gp.Variant(
-			"int",
+			"literal",
+			JSONString,
+			JSONNumber,
+			JSONObject,
+			JSONArray,
+			JSONBool,
+			JSONNull,
+		),
+		whitespace,
+	)
+	numMinusSign = gp.Optional(gp.Symbol("num-sign", '-'))
+	numSign      = gp.Optional(gp.AnyOneOfRunes("num-sign", '+', '-'))
+	zero         = gp.Symbol("digit", '0')
+	nonZeroDigit = gp.AnyOneOfRunes("digit", '1', '2', '3', '4', '5', '6', '7', '8', '9')
+	digit        = gp.AnyOneOfRunes("digit", '0', '1', '2', '3', '4', '5', '6', '7', '8', '9')
+	JSONNumber   = gp.Seq(
+		"number",
+		numMinusSign,
+		gp.Variant(
+			"",
 			gp.Seq(
-				"zero-beginning number",
-				gp.Symbol("zero", '0'),
-				gp.Optional(
-					gp.Seq(
-						"floating point part",
-						gp.Symbol("floating point", '.'),
-						gp.Repeat("fraction", gp.Digit()),
-					),
-				),
-				gp.Variant(
-					"non-zero",
-					gp.Symbol("1", '1'),
-					gp.Symbol("2", '2'),
-					gp.Symbol("3", '3'),
-					gp.Symbol("4", '4'),
-					gp.Symbol("5", '5'),
-					gp.Symbol("6", '6'),
-					gp.Symbol("7", '7'),
-					gp.Symbol("8", '8'),
-					gp.Symbol("9", '9'),
-				),
+				"",
+				nonZeroDigit,
+				gp.Repeat("", digit),
+			),
+			zero,
+		),
+		gp.Optional(
+			gp.Seq(
+				"",
+				gp.Symbol("dot", '.'),
+				digit,
+				gp.Repeat("", digit),
+			),
+		),
+		gp.Optional(
+			gp.Seq(
+				"mantissa",
+				gp.AnyOneOfRunes("", 'e', 'E'),
+				numSign,
+				digit,
+				gp.Repeat("", digit),
 			),
 		),
 	)
