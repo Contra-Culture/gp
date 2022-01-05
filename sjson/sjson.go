@@ -30,7 +30,7 @@ var (
 				JSONValue,
 				gp.Repeat(
 					"",
-					gp.Symbol("",','),
+					gp.Symbol("", ','),
 					JSONValue,
 				),
 			),
@@ -65,6 +65,27 @@ var (
 	JSONObject = gp.Seq(
 		"string",
 		gp.Symbol("opening bracket", '{'),
+		whitespace,
+		gp.Optional(
+			gp.Seq(
+				"",
+				whitespace,
+				JSONString,
+				whitespace,
+				gp.Symbol("", ':'),
+				JSONValue,
+				gp.Repeat(
+					"",
+					gp.Seq(
+						gp.Symbol("", ','),
+						JSONString,
+						whitespace,
+						gp.Symbol("", ':'),
+						JSONValue,
+					),
+				),
+			),
+		),
 		gp.Symbol("closing bracket", '}'),
 	)
 	JSONValue = gp.Seq(
