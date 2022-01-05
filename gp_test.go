@@ -9,18 +9,6 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var testJSONS = []string{
-	"{}",
-	"",
-	"null",
-	"1",
-	"15.999",
-	"[]",
-	"[1,2,3]",
-	"[1,\"\",\"test\",2,[],[1, \"test2\"],{},{\"a\":\"test3\"}]",
-	"{\"a\":\"test1\",\"b\":2,\"c\":{\"d\":3.14}}",
-}
-
 var _ = Describe("gp", func() {
 	Describe("parsers", func() {
 		Describe("symbol parser", func() {
@@ -44,13 +32,13 @@ var _ = Describe("gp", func() {
 		})
 		Describe("string parser", func() {
 			It("parses string", func() {
-				str := String("keyword end", "end")
+				str := String("end")
 				rs := RuneScanner("end")
 				n, err := str.Parse(rs)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(n).NotTo(BeNil())
-				Expect(n.ParserName()).To(Equal("keyword end"))
-				Expect(n.ParserKind()).To(Equal("string"))
+				Expect(n.ParserName()).To(Equal("\"end\""))
+				Expect(n.ParserKind()).To(Equal("sequence"))
 				Expect(n.Parsed()).To(Equal([]rune{'e', 'n', 'd'}))
 			})
 		})
@@ -109,7 +97,7 @@ var _ = Describe("gp", func() {
 		})
 		Describe("optional parser", func() {
 			It("parses optional stuff", func() {
-				optional := Optional("optional digit sign", Variant("digit sign", Symbol("minus", '-'), Symbol("plus", '+')))
+				optional := Optional(Variant("digit sign", Symbol("minus", '-'), Symbol("plus", '+')))
 				tests := map[string][]rune{
 					"-": {'-'},
 					"+": {'+'},
@@ -119,9 +107,213 @@ var _ = Describe("gp", func() {
 					rs := RuneScanner(t)
 					n, err := optional.Parse(rs)
 					Expect(err).NotTo(HaveOccurred())
-					Expect(n.ParserName()).To(Equal("optional digit sign"))
+					Expect(n.ParserName()).To(Equal("[digit sign]"))
 					Expect(n.ParserKind()).To(Equal("optional"))
 					Expect(n.Parsed()).To(Equal(runes))
+				}
+			})
+		})
+		Describe("digit symbol parser", func() {
+			It("parses special symbol", func() {
+				tests := []string{
+					"0",
+					"1",
+					"2",
+					"3",
+					"4",
+					"5",
+					"6",
+					"7",
+					"8",
+					"9",
+				}
+				sp := Digit()
+				for _, t := range tests {
+					rs := RuneScanner(t)
+					n, err := sp.Parse(rs)
+					Expect(err).NotTo(HaveOccurred())
+					Expect(n).NotTo(BeNil())
+					Expect(n.ParserName()).To(Equal("digit"))
+					Expect(n.ParserKind()).To(Equal("variant"))
+					Expect(n.Parsed()).To(Equal([]rune(t)))
+				}
+			})
+		})
+		Describe("any of listed runes parser", func() {
+			It("parses special symbol", func() {
+				tests := []string{
+					"0",
+					"1",
+					"2",
+					"3",
+					"4",
+					"5",
+					"6",
+					"7",
+					"8",
+					"9",
+				}
+				sp := AnyOneOfRunes("decimals except zero", '0', '1', '2', '3', '4', '5', '6', '7', '8', '9')
+				for _, t := range tests {
+					rs := RuneScanner(t)
+					n, err := sp.Parse(rs)
+					Expect(err).NotTo(HaveOccurred())
+					Expect(n).NotTo(BeNil())
+					Expect(n.ParserName()).To(Equal("decimals except zero"))
+					Expect(n.ParserKind()).To(Equal("variant"))
+					Expect(n.Parsed()).To(Equal([]rune(t)))
+				}
+			})
+		})
+		Describe("low alpha symbol parser", func() {
+			It("parses low alpha symbol", func() {
+				tests := []string{
+					"a",
+					"b",
+					"c",
+					"d",
+					"e",
+					"f",
+					"g",
+					"h",
+					"i",
+					"j",
+					"k",
+					"l",
+					"m",
+					"n",
+					"o",
+					"p",
+					"q",
+					"r",
+					"s",
+					"t",
+					"u",
+					"v",
+					"w",
+					"x",
+					"y",
+					"z",
+				}
+				sp := LowAlpha()
+				for _, t := range tests {
+					rs := RuneScanner(t)
+					n, err := sp.Parse(rs)
+					Expect(err).NotTo(HaveOccurred())
+					Expect(n).NotTo(BeNil())
+					Expect(n.ParserName()).To(Equal("lowAlpha"))
+					Expect(n.ParserKind()).To(Equal("variant"))
+					Expect(n.Parsed()).To(Equal([]rune(t)))
+				}
+			})
+		})
+		Describe("high alpha symbol parser", func() {
+			It("parses low alpha symbol", func() {
+				tests := []string{
+					"A",
+					"B",
+					"C",
+					"D",
+					"E",
+					"F",
+					"G",
+					"H",
+					"I",
+					"J",
+					"K",
+					"L",
+					"M",
+					"N",
+					"O",
+					"P",
+					"Q",
+					"R",
+					"S",
+					"T",
+					"U",
+					"V",
+					"W",
+					"X",
+					"Y",
+					"Z",
+				}
+				sp := HighAlpha()
+				for _, t := range tests {
+					rs := RuneScanner(t)
+					n, err := sp.Parse(rs)
+					Expect(err).NotTo(HaveOccurred())
+					Expect(n).NotTo(BeNil())
+					Expect(n.ParserName()).To(Equal("highAlpha"))
+					Expect(n.ParserKind()).To(Equal("variant"))
+					Expect(n.Parsed()).To(Equal([]rune(t)))
+				}
+			})
+		})
+		Describe("alpha symbol parser", func() {
+			It("parses low alpha symbol", func() {
+				tests := []string{
+					"a",
+					"b",
+					"c",
+					"d",
+					"e",
+					"f",
+					"g",
+					"h",
+					"i",
+					"j",
+					"k",
+					"l",
+					"m",
+					"n",
+					"o",
+					"p",
+					"q",
+					"r",
+					"s",
+					"t",
+					"u",
+					"v",
+					"w",
+					"x",
+					"y",
+					"z",
+					"A",
+					"B",
+					"C",
+					"D",
+					"E",
+					"F",
+					"G",
+					"H",
+					"I",
+					"J",
+					"K",
+					"L",
+					"M",
+					"N",
+					"O",
+					"P",
+					"Q",
+					"R",
+					"S",
+					"T",
+					"U",
+					"V",
+					"W",
+					"X",
+					"Y",
+					"Z",
+				}
+				sp := Alpha()
+				for _, t := range tests {
+					rs := RuneScanner(t)
+					n, err := sp.Parse(rs)
+					Expect(err).NotTo(HaveOccurred())
+					Expect(n).NotTo(BeNil())
+					Expect(n.ParserName()).To(Equal("alpha"))
+					Expect(n.ParserKind()).To(Equal("variant"))
+					Expect(n.Parsed()).To(Equal([]rune(t)))
 				}
 			})
 		})
