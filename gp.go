@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"io"
+
+	"github.com/Contra-Culture/report"
 )
 
 type (
@@ -42,8 +44,69 @@ type (
 	runeExceptParser struct {
 		exceptions []rune
 	}
+	proxyParser func() Parser
+	univParser  struct {
+		parsers map[string]Parser
+	}
+	UnivCfgr struct {
+		univ         *univParser
+		namesToCheck []string
+		report       report.Node
+	}
 )
 
+const TOP_NAME = ""
+
+func New(cfg func(*UnivCfgr)) (p Parser, err error) {
+	uc := &UnivCfgr{
+		univ: &univParser{},
+	}
+	cfg(uc)
+	ok := uc.check()
+	if !ok {
+		return
+	}
+	p = uc.univ
+	return
+}
+func (c *UnivCfgr) check() (ok bool) {
+	_, ok = c.univ.parsers[TOP_NAME]
+	if !ok {
+		c.report.Error("top-level parser is not specified")
+		return false
+	}
+	return true
+}
+func (c *UnivCfgr) Top(p Parser) {
+	_, exists := c.univ.parsers[TOP_NAME]
+	if exists {
+		c.report.Error("top parser already specified")
+		return
+	}
+	c.univ.parsers[TOP_NAME] = p
+}
+func (c *UnivCfgr) Define(n string, p Parser) {
+	_, exists := c.univ.parsers[n]
+	if exists {
+		c.report.Error("parser \"%s\" already specified", n)
+		return
+	}
+	c.univ.parsers[n] = p
+}
+func (c *UnivCfgr) Get(n string) Parser {
+	c.namesToCheck = append(c.namesToCheck, n)
+	u := c.univ
+	return proxyParser(
+		func() Parser {
+			return u.parsers[n]
+		})
+}
+func (p proxyParser) Parse(rs io.RuneScanner) (*ASTNode, error) {
+	return (func() Parser)(p)().Parse(rs)
+}
+func (u *univParser) Parse(rs io.RuneScanner) (*ASTNode, error) {
+	return u.parsers[TOP_NAME].Parse(rs)
+}
 func RuneExcept(rs ...rune) (p Parser) {
 	return runeExceptParser{
 		exceptions: rs,
