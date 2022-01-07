@@ -95,28 +95,110 @@ var _ = Describe("gp", func() {
 				}
 			})
 		})
-		Describe("digit symbol parser", func() {
-			It("parses special symbol", func() {
-				tests := []string{
-					"0",
-					"1",
-					"2",
-					"3",
-					"4",
-					"5",
-					"6",
-					"7",
-					"8",
-					"9",
-				}
-				sp := Digit()
-				for _, t := range tests {
-					rs := NewRuneScanner(t)
-					n, err := sp.Parse(rs)
-					Expect(err).NotTo(HaveOccurred())
-					Expect(n).NotTo(BeNil())
-					Expect(n.Parsed()).To(Equal([]rune(t)))
-				}
+		Describe("range parser", func() {
+			Context("when Digits range", func() {
+				It("parses special symbol", func() {
+					tests := []string{
+						"0",
+						"1",
+						"2",
+						"3",
+						"4",
+						"5",
+						"6",
+						"7",
+						"8",
+						"9",
+					}
+					sp := Range(Digits())
+					for _, t := range tests {
+						rs := NewRuneScanner(t)
+						n, err := sp.Parse(rs)
+						Expect(err).NotTo(HaveOccurred())
+						Expect(n).NotTo(BeNil())
+						Expect(n.Parsed()).To(Equal([]rune(t)))
+					}
+				})
+			})
+			Context("when low alphabet symbols range", func() {
+				It("parses low alpha symbol", func() {
+					tests := []string{
+						"a",
+						"b",
+						"c",
+						"d",
+						"e",
+						"f",
+						"g",
+						"h",
+						"i",
+						"j",
+						"k",
+						"l",
+						"m",
+						"n",
+						"o",
+						"p",
+						"q",
+						"r",
+						"s",
+						"t",
+						"u",
+						"v",
+						"w",
+						"x",
+						"y",
+						"z",
+					}
+					sp := Range(LowASCIIAlphabet())
+					for _, t := range tests {
+						rs := NewRuneScanner(t)
+						n, err := sp.Parse(rs)
+						Expect(err).NotTo(HaveOccurred())
+						Expect(n).NotTo(BeNil())
+						Expect(n.Parsed()).To(Equal([]rune(t)))
+					}
+				})
+			})
+			Context("when high alphabet symbols range", func() {
+				It("parses low alpha symbol", func() {
+					tests := []string{
+						"A",
+						"B",
+						"C",
+						"D",
+						"E",
+						"F",
+						"G",
+						"H",
+						"I",
+						"J",
+						"K",
+						"L",
+						"M",
+						"N",
+						"O",
+						"P",
+						"Q",
+						"R",
+						"S",
+						"T",
+						"U",
+						"V",
+						"W",
+						"X",
+						"Y",
+						"Z",
+					}
+					sp := Range(HighASCIIAlphabet())
+					for _, t := range tests {
+						rs := NewRuneScanner(t)
+						n, err := sp.Parse(rs)
+						Expect(err).NotTo(HaveOccurred())
+						Expect(n).NotTo(BeNil())
+						Expect(n.Parsed()).To(Equal([]rune(t)))
+					}
+				})
 			})
 		})
 		Describe("any of listed runes parser", func() {
@@ -134,152 +216,6 @@ var _ = Describe("gp", func() {
 					"9",
 				}
 				sp := AnyOneOfRunes('0', '1', '2', '3', '4', '5', '6', '7', '8', '9')
-				for _, t := range tests {
-					rs := NewRuneScanner(t)
-					n, err := sp.Parse(rs)
-					Expect(err).NotTo(HaveOccurred())
-					Expect(n).NotTo(BeNil())
-					Expect(n.Parsed()).To(Equal([]rune(t)))
-				}
-			})
-		})
-		Describe("low alpha symbol parser", func() {
-			It("parses low alpha symbol", func() {
-				tests := []string{
-					"a",
-					"b",
-					"c",
-					"d",
-					"e",
-					"f",
-					"g",
-					"h",
-					"i",
-					"j",
-					"k",
-					"l",
-					"m",
-					"n",
-					"o",
-					"p",
-					"q",
-					"r",
-					"s",
-					"t",
-					"u",
-					"v",
-					"w",
-					"x",
-					"y",
-					"z",
-				}
-				sp := LowAlpha()
-				for _, t := range tests {
-					rs := NewRuneScanner(t)
-					n, err := sp.Parse(rs)
-					Expect(err).NotTo(HaveOccurred())
-					Expect(n).NotTo(BeNil())
-					Expect(n.Parsed()).To(Equal([]rune(t)))
-				}
-			})
-		})
-		Describe("high alpha symbol parser", func() {
-			It("parses low alpha symbol", func() {
-				tests := []string{
-					"A",
-					"B",
-					"C",
-					"D",
-					"E",
-					"F",
-					"G",
-					"H",
-					"I",
-					"J",
-					"K",
-					"L",
-					"M",
-					"N",
-					"O",
-					"P",
-					"Q",
-					"R",
-					"S",
-					"T",
-					"U",
-					"V",
-					"W",
-					"X",
-					"Y",
-					"Z",
-				}
-				sp := HighAlpha()
-				for _, t := range tests {
-					rs := NewRuneScanner(t)
-					n, err := sp.Parse(rs)
-					Expect(err).NotTo(HaveOccurred())
-					Expect(n).NotTo(BeNil())
-					Expect(n.Parsed()).To(Equal([]rune(t)))
-				}
-			})
-		})
-		Describe("alpha symbol parser", func() {
-			It("parses low alpha symbol", func() {
-				tests := []string{
-					"a",
-					"b",
-					"c",
-					"d",
-					"e",
-					"f",
-					"g",
-					"h",
-					"i",
-					"j",
-					"k",
-					"l",
-					"m",
-					"n",
-					"o",
-					"p",
-					"q",
-					"r",
-					"s",
-					"t",
-					"u",
-					"v",
-					"w",
-					"x",
-					"y",
-					"z",
-					"A",
-					"B",
-					"C",
-					"D",
-					"E",
-					"F",
-					"G",
-					"H",
-					"I",
-					"J",
-					"K",
-					"L",
-					"M",
-					"N",
-					"O",
-					"P",
-					"Q",
-					"R",
-					"S",
-					"T",
-					"U",
-					"V",
-					"W",
-					"X",
-					"Y",
-					"Z",
-				}
-				sp := Alpha()
 				for _, t := range tests {
 					rs := NewRuneScanner(t)
 					n, err := sp.Parse(rs)

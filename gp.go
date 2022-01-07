@@ -34,9 +34,9 @@ type (
 	optionalParser struct {
 		option Parser
 	}
-	digitParser         struct{}
-	lowAlphaParser      struct{}
-	highAlphaParser     struct{}
+	rangeParser struct {
+		min, max rune
+	}
 	anyOneOfRunesParser struct {
 		runes []rune
 	}
@@ -140,68 +140,28 @@ func (p runeExceptParser) Parse(rs *GPRuneScanner) (n *ASTNode, err error) {
 	}
 	return
 }
-func Alpha() (p Parser) {
-	return Variant(HighAlpha(), LowAlpha())
+func Digits() (min rune, max rune) {
+	return 48, 58
 }
-func AlphaDigit() (p Parser) {
-	return Variant(Alpha(), Digit())
+func LowASCIIAlphabet() (min rune, max rune) {
+	return 97, 122
 }
-func HighAlpha() (p Parser) {
-	return highAlphaParser{}
+func HighASCIIAlphabet() (min rune, max rune) {
+	return 65, 90
 }
-func (p highAlphaParser) Parse(rs *GPRuneScanner) (n *ASTNode, err error) {
+func Range(min, max rune) (p Parser) {
+	return rangeParser{
+		min: min,
+		max: max,
+	}
+}
+func (p rangeParser) Parse(rs *GPRuneScanner) (n *ASTNode, err error) {
 	r, _, err := rs.ReadOne()
 	if err != nil {
 		return
 	}
 	i := int32(r)
-	if i < 65 || i > 90 {
-		_, err = rs.Unread(1)
-		if err != nil {
-			panic(err)
-		}
-		err = fmt.Errorf("wrong rune `%#U`", r)
-		return
-	}
-	n = &ASTNode{
-		parser: p,
-		parsed: []rune{r},
-	}
-	return
-}
-func LowAlpha() (p Parser) {
-	return lowAlphaParser{}
-}
-func (p lowAlphaParser) Parse(rs *GPRuneScanner) (n *ASTNode, err error) {
-	r, _, err := rs.ReadOne()
-	if err != nil {
-		return
-	}
-	i := int32(r)
-	if i < 97 || i > 122 {
-		_, err = rs.Unread(1)
-		if err != nil {
-			panic(err)
-		}
-		err = fmt.Errorf("wrong rune `%#U`", r)
-		return
-	}
-	n = &ASTNode{
-		parser: p,
-		parsed: []rune{r},
-	}
-	return
-}
-func Digit() (p Parser) {
-	return digitParser{}
-}
-func (p digitParser) Parse(rs *GPRuneScanner) (n *ASTNode, err error) {
-	r, _, err := rs.ReadOne()
-	if err != nil {
-		return
-	}
-	i := int32(r)
-	if i < 48 || i > 58 {
+	if i < p.min || i > p.max {
 		_, err = rs.Unread(1)
 		if err != nil {
 			panic(err)
