@@ -1,9 +1,6 @@
 package gp_test
 
 import (
-	"fmt"
-	"io"
-
 	. "github.com/Contra-Culture/gp"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -14,7 +11,7 @@ var _ = Describe("gp", func() {
 		Describe("symbol parser", func() {
 			It("parses symbol", func() {
 				s1 := Symbol('{')
-				rs := RuneScanner("{}")
+				rs := NewRuneScanner("{}")
 				n, err := s1.Parse(rs)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(n).NotTo(BeNil())
@@ -29,7 +26,7 @@ var _ = Describe("gp", func() {
 		Describe("string parser", func() {
 			It("parses string", func() {
 				str := String("end")
-				rs := RuneScanner("end")
+				rs := NewRuneScanner("end")
 				n, err := str.Parse(rs)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(n).NotTo(BeNil())
@@ -39,7 +36,7 @@ var _ = Describe("gp", func() {
 		Describe("sequence parser", func() {
 			It("parses sequence", func() {
 				seq := Seq(Symbol('<'), Symbol('='))
-				rs := RuneScanner("<=")
+				rs := NewRuneScanner("<=")
 				n, err := seq.Parse(rs)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(n).NotTo(BeNil())
@@ -49,7 +46,7 @@ var _ = Describe("gp", func() {
 		Describe("repeat parser", func() {
 			It("parses repeatable stuff", func() {
 				rep := Repeat(Symbol('='))
-				rs := RuneScanner("=====")
+				rs := NewRuneScanner("=====")
 				n, err := rep.Parse(rs)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(n.Parsed()).To(Equal([]rune{'=', '=', '=', '=', '='}))
@@ -58,10 +55,10 @@ var _ = Describe("gp", func() {
 		Describe("variant parser", func() {
 			It("parses variants", func() {
 				vars := Variant(
-					Seq(Symbol('='), Symbol('=')),
-					Seq(Symbol('<'), Symbol('=')),
-					Seq(Symbol('>'), Symbol('=')),
-					Seq(Symbol('!'), Symbol('=')),
+					String("!="),
+					String("=="),
+					String("<="),
+					String(">="),
 					Symbol('<'),
 					Symbol('>'),
 				)
@@ -74,7 +71,7 @@ var _ = Describe("gp", func() {
 					"==",
 				}
 				for _, op := range operators {
-					rs := RuneScanner(op)
+					rs := NewRuneScanner(op)
 					n, err := vars.Parse(rs)
 					Expect(err).NotTo(HaveOccurred())
 					Expect(n).NotTo(BeNil())
@@ -91,7 +88,7 @@ var _ = Describe("gp", func() {
 					"x": nil,
 				}
 				for t, runes := range tests {
-					rs := RuneScanner(t)
+					rs := NewRuneScanner(t)
 					n, err := optional.Parse(rs)
 					Expect(err).NotTo(HaveOccurred())
 					Expect(n.Parsed()).To(Equal(runes))
@@ -114,7 +111,7 @@ var _ = Describe("gp", func() {
 				}
 				sp := Digit()
 				for _, t := range tests {
-					rs := RuneScanner(t)
+					rs := NewRuneScanner(t)
 					n, err := sp.Parse(rs)
 					Expect(err).NotTo(HaveOccurred())
 					Expect(n).NotTo(BeNil())
@@ -138,7 +135,7 @@ var _ = Describe("gp", func() {
 				}
 				sp := AnyOneOfRunes('0', '1', '2', '3', '4', '5', '6', '7', '8', '9')
 				for _, t := range tests {
-					rs := RuneScanner(t)
+					rs := NewRuneScanner(t)
 					n, err := sp.Parse(rs)
 					Expect(err).NotTo(HaveOccurred())
 					Expect(n).NotTo(BeNil())
@@ -178,7 +175,7 @@ var _ = Describe("gp", func() {
 				}
 				sp := LowAlpha()
 				for _, t := range tests {
-					rs := RuneScanner(t)
+					rs := NewRuneScanner(t)
 					n, err := sp.Parse(rs)
 					Expect(err).NotTo(HaveOccurred())
 					Expect(n).NotTo(BeNil())
@@ -218,7 +215,7 @@ var _ = Describe("gp", func() {
 				}
 				sp := HighAlpha()
 				for _, t := range tests {
-					rs := RuneScanner(t)
+					rs := NewRuneScanner(t)
 					n, err := sp.Parse(rs)
 					Expect(err).NotTo(HaveOccurred())
 					Expect(n).NotTo(BeNil())
@@ -284,7 +281,7 @@ var _ = Describe("gp", func() {
 				}
 				sp := Alpha()
 				for _, t := range tests {
-					rs := RuneScanner(t)
+					rs := NewRuneScanner(t)
 					n, err := sp.Parse(rs)
 					Expect(err).NotTo(HaveOccurred())
 					Expect(n).NotTo(BeNil())
@@ -294,32 +291,3 @@ var _ = Describe("gp", func() {
 		})
 	})
 })
-
-type runeScanner struct {
-	runes  []rune
-	cursor int
-}
-
-func RuneScanner(s string) io.RuneScanner {
-	return &runeScanner{
-		runes:  []rune(s),
-		cursor: -1,
-	}
-}
-func (s *runeScanner) ReadRune() (r rune, l int, err error) {
-	if s.cursor > len(s.runes)-2 {
-		err = io.ErrUnexpectedEOF
-		return
-	}
-	s.cursor++
-	r = s.runes[s.cursor]
-	l = len([]byte(string(r)))
-	return
-}
-func (s *runeScanner) UnreadRune() (err error) {
-	if s.cursor >= 0 {
-		s.cursor--
-		return
-	}
-	return fmt.Errorf("can't unread rune")
-}
