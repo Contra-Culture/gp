@@ -85,7 +85,6 @@ var _ = Describe("gp", func() {
 				tests := map[string][]rune{
 					"-": {'-'},
 					"+": {'+'},
-					"x": nil,
 				}
 				for t, runes := range tests {
 					rs := NewRuneScanner(t)
@@ -93,6 +92,9 @@ var _ = Describe("gp", func() {
 					Expect(err).NotTo(HaveOccurred())
 					Expect(n.Parsed()).To(Equal(runes))
 				}
+				n, err := optional.Parse(NewRuneScanner("x"))
+				Expect(err).NotTo(HaveOccurred())
+				Expect(n).To(BeNil())
 			})
 		})
 		Describe("range parser", func() {
@@ -219,6 +221,51 @@ var _ = Describe("gp", func() {
 				for _, t := range tests {
 					rs := NewRuneScanner(t)
 					n, err := sp.Parse(rs)
+					Expect(err).NotTo(HaveOccurred())
+					Expect(n).NotTo(BeNil())
+					Expect(n.Parsed()).To(Equal([]rune(t)))
+				}
+			})
+		})
+		Describe("proxy parser", func() {
+			It("parses using predefined parser", func() {
+				p, err := New(func(u *UnivCfgr) {
+					u.Define("alpha", Range(LowASCIIAlphabet()))
+					u.Top(u.Get("alpha"))
+				})
+				Expect(err).NotTo(HaveOccurred())
+				Expect(p).NotTo(BeNil())
+				tests := []string{
+					"a",
+					"b",
+					"c",
+					"d",
+					"e",
+					"f",
+					"g",
+					"h",
+					"i",
+					"j",
+					"k",
+					"l",
+					"m",
+					"n",
+					"o",
+					"p",
+					"q",
+					"r",
+					"s",
+					"t",
+					"u",
+					"v",
+					"w",
+					"x",
+					"y",
+					"z",
+				}
+				for _, t := range tests {
+					rs := NewRuneScanner(t)
+					n, err := p.Parse(rs)
 					Expect(err).NotTo(HaveOccurred())
 					Expect(n).NotTo(BeNil())
 					Expect(n.Parsed()).To(Equal([]rune(t)))

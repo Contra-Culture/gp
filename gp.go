@@ -8,39 +8,43 @@ import (
 )
 
 type (
-	ASTNode struct {
-		parser   Parser
-		parsed   []rune
-		children []*ASTNode
-	}
 	Parser interface {
-		Parse(*GPRuneScanner) (*ASTNode, error)
+		Parse(*GPRuneScanner) (*Node, error)
 	}
 	symbolParser struct {
-		r rune
+		tags []string
+		r    rune
 	}
 	stringParser struct {
-		str string
+		tags []string
+		str  string
 	}
 	sequenceParser struct {
+		tags     []string
 		children []Parser
 	}
 	repeatParser struct {
+		tags       []string
 		repeatable Parser
 	}
 	variantParser struct {
+		tags     []string
 		variants []Parser
 	}
 	optionalParser struct {
+		tags   []string
 		option Parser
 	}
 	rangeParser struct {
+		tags     []string
 		min, max rune
 	}
 	anyOneOfRunesParser struct {
+		tags  []string
 		runes []rune
 	}
 	runeExceptParser struct {
+		tags       []string
 		exceptions []rune
 	}
 	proxyParser func() Parser
@@ -56,6 +60,31 @@ type (
 
 const TOP_NAME = ""
 
+func T(p Parser, tags ...string) Parser {
+	switch _p := p.(type) {
+	case *symbolParser:
+		_p.tags = tags
+	case *stringParser:
+		_p.tags = tags
+	case *sequenceParser:
+		_p.tags = tags
+	case *repeatParser:
+		_p.tags = tags
+	case *variantParser:
+		_p.tags = tags
+	case *optionalParser:
+		_p.tags = tags
+	case *rangeParser:
+		_p.tags = tags
+	case *anyOneOfRunesParser:
+		_p.tags = tags
+	case *runeExceptParser:
+		_p.tags = tags
+	default:
+		panic("not a parser") // should not occur
+	}
+	return p
+}
 func New(cfg func(*UnivCfgr)) (p Parser, err error) {
 	uc := &UnivCfgr{
 		univ: &univParser{
@@ -112,10 +141,10 @@ func (c *UnivCfgr) Get(n string) Parser {
 			return u.parsers[n]
 		})
 }
-func (p proxyParser) Parse(rs *GPRuneScanner) (*ASTNode, error) {
+func (p proxyParser) Parse(rs *GPRuneScanner) (*Node, error) {
 	return (func() Parser)(p)().Parse(rs)
 }
-func (u *univParser) Parse(rs *GPRuneScanner) (*ASTNode, error) {
+func (u *univParser) Parse(rs *GPRuneScanner) (*Node, error) {
 	return u.parsers[TOP_NAME].Parse(rs)
 }
 func RuneExcept(rs ...rune) (p Parser) {
@@ -123,7 +152,7 @@ func RuneExcept(rs ...rune) (p Parser) {
 		exceptions: rs,
 	}
 }
-func (p runeExceptParser) Parse(rs *GPRuneScanner) (n *ASTNode, err error) {
+func (p runeExceptParser) Parse(rs *GPRuneScanner) (n *Node, err error) {
 	r, _, err := rs.ReadOne()
 	if err != nil {
 		panic(err)
@@ -134,28 +163,29 @@ func (p runeExceptParser) Parse(rs *GPRuneScanner) (n *ASTNode, err error) {
 			return
 		}
 	}
-	n = &ASTNode{
-		parser: p,
+	n = &Node{
+		tags:   p.tags,
 		parsed: []rune{r},
 	}
 	return
 }
-func Digits() (min rune, max rune) {
+func Digits() (rune, rune) {
 	return 48, 58
 }
-func LowASCIIAlphabet() (min rune, max rune) {
+func LowASCIIAlphabet() (rune, rune) {
 	return 97, 122
 }
-func HighASCIIAlphabet() (min rune, max rune) {
+func HighASCIIAlphabet() (rune, rune) {
 	return 65, 90
 }
+
 func Range(min, max rune) (p Parser) {
 	return rangeParser{
 		min: min,
 		max: max,
 	}
 }
-func (p rangeParser) Parse(rs *GPRuneScanner) (n *ASTNode, err error) {
+func (p rangeParser) Parse(rs *GPRuneScanner) (n *Node, err error) {
 	r, _, err := rs.ReadOne()
 	if err != nil {
 		return
@@ -169,17 +199,11 @@ func (p rangeParser) Parse(rs *GPRuneScanner) (n *ASTNode, err error) {
 		err = fmt.Errorf("wrong rune `%#U`", r)
 		return
 	}
-	n = &ASTNode{
-		parser: p,
+	n = &Node{
 		parsed: []rune{r},
+		tags:   p.tags,
 	}
 	return
-}
-func (n *ASTNode) Parsed() []rune {
-	return n.parsed
-}
-func (n *ASTNode) Children() []*ASTNode {
-	return n.children
 }
 func Symbol(r rune) (p Parser) {
 	p = &symbolParser{
@@ -187,14 +211,14 @@ func Symbol(r rune) (p Parser) {
 	}
 	return
 }
-func (p *symbolParser) Parse(rs *GPRuneScanner) (node *ASTNode, err error) {
+func (p *symbolParser) Parse(rs *GPRuneScanner) (node *Node, err error) {
 	r, _, err := rs.ReadOne()
 	if err != nil {
 		return
 	}
 	if r == p.r {
-		node = &ASTNode{
-			parser: p,
+		node = &Node{
+			tags:   p.tags,
 			parsed: []rune{r},
 		}
 		return
@@ -212,11 +236,12 @@ func Seq(ps ...Parser) (p Parser) {
 	}
 	return
 }
-func (p *sequenceParser) Parse(rs *GPRuneScanner) (node *ASTNode, err error) {
-	node = &ASTNode{
-		parser: p,
+func (p *sequenceParser) Parse(rs *GPRuneScanner) (node *Node, err error) {
+	node = &Node{
+		tags:   p.tags,
+		parsed: []rune{},
 	}
-	var childNode *ASTNode
+	var childNode *Node
 	for _, childParser := range p.children {
 		childNode, err = childParser.Parse(rs)
 		originErr := err
@@ -230,8 +255,10 @@ func (p *sequenceParser) Parse(rs *GPRuneScanner) (node *ASTNode, err error) {
 			err = fmt.Errorf("parser failed: %w", originErr)
 			return
 		}
-		node.parsed = append(node.parsed, childNode.parsed...)
-		node.children = append(node.children, childNode)
+		if childNode != nil { // not optional node
+			node.parsed = append(node.parsed, childNode.parsed...)
+			node.children = append(node.children, childNode)
+		}
 	}
 	return
 }
@@ -240,27 +267,30 @@ func AnyOneOfRunes(rs ...rune) (p Parser) {
 		runes: rs,
 	}
 }
-func (p *anyOneOfRunesParser) Parse(rs *GPRuneScanner) (n *ASTNode, err error) {
-	n = &ASTNode{
-		parser: p,
+func (p *anyOneOfRunesParser) Parse(rs *GPRuneScanner) (n *Node, err error) {
+	n = &Node{
+		tags:   p.tags,
+		parsed: []rune{},
 	}
 	var r rune
 	r, _, err = rs.ReadOne()
 	if err != nil {
-		panic(r)
+		if err == ErrNoRuneToRead {
+			return nil, nil
+		}
+		panic(err)
 	}
 	for _, expected := range p.runes {
 		if expected == r {
 			n.parsed = append(n.parsed, r)
 			return
 		}
-
 	}
 	_, err = rs.Unread(1)
 	if err != nil {
 		panic(err)
 	}
-	err = fmt.Errorf("unexpected utf-8 rune: `%#U`", r)
+	err = fmt.Errorf("unexpected utf-8 rune: `%#U`, expected: %#v", r, p.runes)
 	return
 }
 func String(s string) (p Parser) {
@@ -269,10 +299,11 @@ func String(s string) (p Parser) {
 	}
 	return
 }
-func (p *stringParser) Parse(rr *GPRuneScanner) (node *ASTNode, err error) {
+func (p *stringParser) Parse(rr *GPRuneScanner) (node *Node, err error) {
 	var r rune
-	node = &ASTNode{
-		parser: p,
+	node = &Node{
+		tags:   p.tags,
+		parsed: []rune{},
 	}
 	for _, expected := range p.str {
 		r, _, err = rr.ReadOne()
@@ -304,10 +335,11 @@ func Repeat(rp Parser) (p Parser) {
 	}
 	return
 }
-func (p *repeatParser) Parse(rr *GPRuneScanner) (node *ASTNode, err error) {
-	var child *ASTNode
-	node = &ASTNode{
-		parser: p,
+func (p *repeatParser) Parse(rr *GPRuneScanner) (node *Node, err error) {
+	var child *Node
+	node = &Node{
+		tags:   p.tags,
+		parsed: []rune{},
 	}
 	for {
 		child, err = p.repeatable.Parse(rr)
@@ -325,7 +357,7 @@ func Variant(variants ...Parser) (p Parser) {
 	}
 	return
 }
-func (p *variantParser) Parse(rs *GPRuneScanner) (node *ASTNode, err error) {
+func (p *variantParser) Parse(rs *GPRuneScanner) (node *Node, err error) {
 	for _, v := range p.variants {
 		node, err = v.Parse(rs)
 		if err != nil {
@@ -343,16 +375,8 @@ func Optional(op Parser) (p Parser) {
 	}
 	return
 }
-func (p *optionalParser) Parse(rs *GPRuneScanner) (node *ASTNode, err error) {
-	node = &ASTNode{
-		parser: p,
-	}
-	child, err := p.option.Parse(rs)
-	if err != nil {
-		err = nil
-		return
-	}
-	node.children = append(node.children, child)
-	node.parsed = append(node.parsed, child.parsed...)
+func (p *optionalParser) Parse(rs *GPRuneScanner) (node *Node, err error) {
+	node, err = p.option.Parse(rs)
+	err = nil
 	return
 }
