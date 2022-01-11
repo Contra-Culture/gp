@@ -4,6 +4,7 @@ import "github.com/Contra-Culture/report"
 
 type (
 	universe struct {
+		top   string
 		rules map[string]interface{}
 	}
 	UniverseCfgr struct {
@@ -47,19 +48,18 @@ outer:
 	}
 	return true
 }
-func (c *UniverseCfgr) Top(p Parser) {
-	_, exists := c.universe.rules[TOP_NAME]
-	if exists {
+func (c *UniverseCfgr) Top(n string) {
+	if len(c.universe.top) != 0 {
 		c.report.Error("top parser already specified")
 		return
 	}
-	c.universe.rules[TOP_NAME] = p
+	c.universe.top = n
 }
-func (c *UniverseCfgr) Define(n string, p Parser) {
+func (c *UniverseCfgr) Define(n string, r interface{}) {
 	_, exists := c.universe.rules[n]
 	if exists {
 		c.report.Error("parser \"%s\" already specified", n)
 		return
 	}
-	c.universe.rules[n] = p
+	c.universe.rules[n] = r
 }
