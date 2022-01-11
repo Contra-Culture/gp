@@ -1,29 +1,14 @@
 package gp
 
-import "errors"
-
 type (
-	variantParser struct {
+	variantRule struct {
 		tags     []string
-		variants []Parser
+		variants []interface{}
 	}
 )
 
-func Variant(variants ...Parser) (p Parser) {
-	p = &variantParser{
+func Variant(variants ...interface{}) interface{} {
+	return &variantRule{
 		variants: variants,
 	}
-	return
-}
-func (p *variantParser) Parse(rs *GPRuneScanner) (node *Node, err error) {
-	for _, v := range p.variants {
-		node, err = v.Parse(rs)
-		if err != nil {
-			err = nil
-			continue
-		}
-		return
-	}
-	err = errors.New("no variant parsed")
-	return
 }

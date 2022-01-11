@@ -1,9 +1,14 @@
 package gp
 
 type (
-	proxyParser string
+	proxyRule struct {
+		optional bool
+		name     string
+	}
 )
 
-func (p proxyParser) Parse(rs *GPRuneScanner) (*Node, error) {
-	return (func() Parser)(p)().Parse(rs)
+func Use(n string) interface{} {
+	return proxyRule{
+		name: n,
+	}
 }

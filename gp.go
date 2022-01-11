@@ -1,31 +1,35 @@
 package gp
 
+type (
+	Parser struct {
+		universe universe
+	}
+)
+
 const TOP_NAME = ""
 
-func T(p Parser, tags ...string) Parser {
-	switch _p := p.(type) {
-	case *symbolParser:
-		_p.tags = tags
-	case *stringParser:
-		_p.tags = tags
-	case *sequenceParser:
-		_p.tags = tags
-	case *repeatParser:
-		_p.tags = tags
-	case *variantParser:
-		_p.tags = tags
-	case *optionalParser:
-		_p.tags = tags
-	case *rangeParser:
-		_p.tags = tags
-	case *anyOneOfRunesParser:
-		_p.tags = tags
-	case *runeExceptParser:
-		_p.tags = tags
+func T(r interface{}, tags ...string) interface{} {
+	switch _r := r.(type) {
+	case symbolRule:
+		_r.tags = tags
+	case stringRule:
+		_r.tags = tags
+	case sequenceRule:
+		_r.tags = tags
+	case repeatRule:
+		_r.tags = tags
+	case variantRule:
+		_r.tags = tags
+	case rangeRule:
+		_r.tags = tags
+	case anyOfRunesRule:
+		_r.tags = tags
+	case runeExceptRule:
+		_r.tags = tags
 	default:
 		panic("not a parser") // should not occur
 	}
-	return p
+	return r
 }
 func Digits() (rune, rune) {
 	return 48, 58
@@ -35,4 +39,7 @@ func LowASCIIAlphabet() (rune, rune) {
 }
 func HighASCIIAlphabet() (rune, rune) {
 	return 65, 90
+}
+func (p *Parser) Parse(rs *GPRuneScanner) (n *Node, err error) {
+	return
 }
