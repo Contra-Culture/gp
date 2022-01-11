@@ -2,8 +2,9 @@ package gp
 
 type (
 	symbolRule struct {
-		tags []string
-		r    rune
+		optional bool
+		tags     []string
+		r        rune
 	}
 )
 

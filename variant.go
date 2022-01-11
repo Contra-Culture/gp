@@ -2,6 +2,7 @@ package gp
 
 type (
 	variantRule struct {
+		optional bool
 		tags     []string
 		variants []interface{}
 	}

@@ -27,19 +27,11 @@ func T(r interface{}, tags ...string) interface{} {
 	case runeExceptRule:
 		_r.tags = tags
 	default:
-		panic("not a parser") // should not occur
+		panic("not a rule") // should not occur
 	}
 	return r
 }
-func Digits() (rune, rune) {
-	return 48, 58
-}
-func LowASCIIAlphabet() (rune, rune) {
-	return 97, 122
-}
-func HighASCIIAlphabet() (rune, rune) {
-	return 65, 90
-}
+
 func (p *Parser) Parse(rs *GPRuneScanner) (n *Node, err error) {
 	return
 }

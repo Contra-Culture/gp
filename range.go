@@ -14,3 +14,12 @@ func Range(min, max rune) interface{} {
 		max: max,
 	}
 }
+func Digits() (rune, rune) {
+	return 48, 58
+}
+func LowASCIIAlphabet() (rune, rune) {
+	return 97, 122
+}
+func HighASCIIAlphabet() (rune, rune) {
+	return 65, 90
+}
