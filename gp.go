@@ -2,12 +2,34 @@ package gp
 
 type (
 	Parser struct {
-		universe universe
+		syntax *syntax
 	}
 )
 
 const TOP_NAME = ""
 
+func New(cfg func(*SyntaxCfgr)) (p *Parser, err error) {
+	uc := &SyntaxCfgr{
+		syntax: &syntax{
+			rules: map[string]interface{}{},
+		},
+	}
+	cfg(uc)
+	ok := uc.check()
+	if !ok {
+		return
+	}
+	u := uc.syntax
+	p = &Parser{
+		syntax: u,
+	}
+	return
+}
+func (p *Parser) Parse(rs *GPRuneScanner) (n *Node, err error) {
+	u := p.syntax
+	tr := u.rules[u.top]
+	return
+}
 func T(r interface{}, tags ...string) interface{} {
 	switch _r := r.(type) {
 	case symbolRule:
@@ -30,8 +52,4 @@ func T(r interface{}, tags ...string) interface{} {
 		panic("not a rule") // should not occur
 	}
 	return r
-}
-
-func (p *Parser) Parse(rs *GPRuneScanner) (n *Node, err error) {
-	return
 }
